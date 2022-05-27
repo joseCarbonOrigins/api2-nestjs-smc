@@ -2,6 +2,8 @@ import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 // serivices
 import { OriginsService } from '../services/origins.service';
+// dtos
+import { PickMissionDto } from '../dtos/missions.dto';
 
 @ApiTags('Origins')
 @Controller('origins')
@@ -14,7 +16,7 @@ export class OriginsController {
   }
 
   @Patch('missions/pick')
-  pickAMission(@Body() payload: any) {
+  pickAMission(@Body() payload: PickMissionDto) {
     return this.originsService.pickAMission(payload);
   }
 

@@ -4,6 +4,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
+// dtos
+import { PickMissionDto } from '../dtos/missions.dto';
 //schemas
 import { Skipster } from 'src/database/schemas/skipster.schema';
 import { Skip } from 'src/database/schemas/skip.schema';
@@ -135,7 +137,7 @@ export class OriginsService {
     }
   }
 
-  async pickAMission(payload: any): Promise<any> {
+  async pickAMission(payload: PickMissionDto): Promise<any> {
     try {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
