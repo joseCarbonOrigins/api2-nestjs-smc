@@ -8,13 +8,23 @@ import { OriginsService } from '../services/origins.service';
 export class OriginsController {
   constructor(private originsService: OriginsService) {}
 
-  @Get('order/:skippyname')
-  getSkippyOrder(@Param('skippyname') skippyname: string) {
-    return this.originsService.getSkippyOrder(skippyname);
+  @Get('missions')
+  getAvailableMissions() {
+    return this.originsService.getAvailableMissions();
+  }
+
+  @Patch('missions/pick')
+  pickAMission(@Body() payload: any) {
+    return this.originsService.pickAMission(payload);
   }
 
   @Patch('missions/update-status')
   updateMissionOrderStatus(@Body() payload: any) {
     return this.originsService.updateMissionOrderStatus(payload);
+  }
+
+  @Get('order/:skippyname')
+  getSkippyOrder(@Param('skippyname') skippyname: string) {
+    return this.originsService.getSkippyOrder(skippyname);
   }
 }
