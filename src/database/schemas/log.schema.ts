@@ -13,5 +13,5 @@ export class Log extends Document {
   @Prop({ type: Types.ObjectId, ref: Skipster.name, required: true })
   skipster_id: Skipster | Types.ObjectId;
 }
-
+//SANTIAGO :D
 export const LogSchema = SchemaFactory.createForClass(Log);
