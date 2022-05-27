@@ -22,3 +22,6 @@ functions:
       - http:
           method: ANY
           path: '{proxy+}'
+custom:
+    optimize:
+        external: ['swagger-ui-dist']

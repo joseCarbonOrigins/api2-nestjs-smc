@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 // serivices
 import { OriginsService } from '../services/origins.service';
 
+@ApiTags('Origins')
 @Controller('origins')
 export class OriginsController {
   constructor(private originsService: OriginsService) {}
