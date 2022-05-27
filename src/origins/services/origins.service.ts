@@ -5,7 +5,10 @@ import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 // dtos
-import { PickMissionDto } from '../dtos/missions.dto';
+import {
+  PickMissionDto,
+  UpdateMissionOrderStatusDto,
+} from '../dtos/missions.dto';
 //schemas
 import { Skipster } from 'src/database/schemas/skipster.schema';
 import { Skip } from 'src/database/schemas/skip.schema';
@@ -230,7 +233,7 @@ export class OriginsService {
     }
   }
 
-  async updateMissionOrderStatus(payload: any) {
+  async updateMissionOrderStatus(payload: UpdateMissionOrderStatusDto) {
     try {
       const client = new Twilio(
         this.configService.get('TWILIO_ACCOUNT_SID'),

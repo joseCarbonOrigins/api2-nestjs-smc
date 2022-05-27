@@ -1,5 +1,5 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { DashboardService } from '../services/dashboard.service';
 
 @ApiTags('Dashboard')
@@ -7,6 +7,7 @@ import { DashboardService } from '../services/dashboard.service';
 export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
+  @ApiOperation({ summary: `Get skippys and skipsters information` })
   @Get()
   getDashboardInfo() {
     return this.dashboardService.getDashboardInfo();
