@@ -8,6 +8,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { DatabaseModule } from './database/database.module';
 
 import { environments } from './environments';
+import { ExternalModule } from './external/external.module';
 import config from './config';
 
 @Module({
@@ -25,6 +26,7 @@ import config from './config';
     OriginsModule,
     DashboardModule,
     DatabaseModule,
+    ExternalModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,21 +1,19 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { firstValueFrom } from 'rxjs';
-import { ConfigService } from '@nestjs/config';
 // dtos
 import {
   PickMissionDto,
   UpdateMissionOrderStatusDto,
 } from '../dtos/missions.dto';
+// external services
+import { DeliverLogicService } from '../../external/services/deliver-logic.service';
+import { TwilioService } from '../../external/services/twilio.service';
 //schemas
 import { Skipster } from 'src/database/schemas/skipster.schema';
 import { Skip } from 'src/database/schemas/skip.schema';
 import { Mission } from 'src/database/schemas/mission.schema';
 import { Skippy } from 'src/database/schemas/skippy.schema';
-// twilio
-import { Twilio } from 'twilio';
 
 @Injectable()
 export class OriginsService {
@@ -24,8 +22,8 @@ export class OriginsService {
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
-    private http: HttpService,
-    private configService: ConfigService,
+    private twilio: TwilioService,
+    private dl: DeliverLogicService,
   ) {}
 
   async getAvailableMissions(): Promise<any> {
@@ -35,11 +33,7 @@ export class OriginsService {
 
       for await (const skippy of skippies) {
         // ask DL to get current order for skippy
-        const dlResponse = await firstValueFrom(
-          this.http.get(
-            `https://www.skippy.cc/api2/drivers/${skippy.email}/orders`,
-          ),
-        );
+        const dlResponse = await this.dl.getAllOrdersDriver(skippy.email);
 
         // if there is an order, create new skip and slice into missions
         if (dlResponse.data.INPROGRESS) {
@@ -188,11 +182,7 @@ export class OriginsService {
     let responseData: object = {};
 
     try {
-      const dlResponse = await firstValueFrom(
-        this.http.get(
-          `https://www.skippy.cc/api2/drivers/${skippyname}/orders`,
-        ),
-      );
+      const dlResponse = await this.dl.getAllOrdersDriver(skippyname);
 
       if (dlResponse.data.INPROGRESS) {
         const order = dlResponse.data.INPROGRESS[0];
@@ -235,38 +225,23 @@ export class OriginsService {
 
   async updateMissionOrderStatus(payload: UpdateMissionOrderStatusDto) {
     try {
-      const client = new Twilio(
-        this.configService.get('TWILIO_ACCOUNT_SID'),
-        this.configService.get('TWILIO_AUTH_TOKEN'),
-      );
       const { status, orderid, skippyname, location, mission_id } = payload;
       const todayDate = new Date();
       const newLocation = {
         type: 'Point',
         coordinates: [location.lat, location.long],
       };
-
-      const dlUpdateOrderStatus = await firstValueFrom(
-        this.http.put(
-          `https://www.skippy.cc/api2/drivers/${skippyname}/orders/${orderid}/status`,
-          {
-            status,
-            is_pip: true,
-            placement_method: 'Driver PiP',
-          },
-        ),
+      const dlUpdateOrderStatus = await this.dl.updateOrderStatus(
+        skippyname,
+        orderid,
+        status,
       );
+
       const updateStatusJson = dlUpdateOrderStatus.data;
 
-      const dlGetOrder = await firstValueFrom(
-        this.http.get(
-          `https://www.skippy.cc/api2/drivers/${skippyname}/orders/${orderid}`,
-        ),
-      );
+      const dlGetOrder = await this.dl.getAnOrder(skippyname, orderid);
       const getOrderInfo = dlGetOrder.data;
-      const dlGetDriver = await firstValueFrom(
-        this.http.get(`https://www.skippy.cc/api2/users/${skippyname}/profile`),
-      );
+      const dlGetDriver = await this.dl.getDriverInfo(skippyname);
       const getDriverInfo = dlGetDriver.data;
 
       const restaurantPhone = `+1${getOrderInfo.restaurant[0].PHONE}`;
@@ -299,28 +274,15 @@ export class OriginsService {
             },
           );
 
-          client.calls.create(
-            {
-              twiml: `<Response><Say> Hello. Skippy. is at your restaurant </Say></Response>`,
-              to: restaurantPhone,
-              from: '+17633633711',
-            },
-            function (err, call) {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log(call);
-              }
-            },
+          this.twilio.makeACall(
+            restaurantPhone,
+            'Hello. Skippy. is at your restaurant',
           );
-          client.messages
-            .create({
-              body: `Hello ${customerName}. Skippy arrived to the restaurant.`,
-              from: '+17633633711',
-              to: customerPhone,
-            })
-            .then((message) => console.log(message.sid));
 
+          this.twilio.sendSMS(
+            customerPhone,
+            `Hello ${customerName}. Skippy is at your restaurant`,
+          );
           break;
         case 'ENROUTE':
           await this.skippyModel.findOneAndUpdate(
@@ -336,13 +298,10 @@ export class OriginsService {
             startTime: todayDate,
           });
 
-          client.messages
-            .create({
-              body: `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
-              from: '+17633633711',
-              to: customerPhone,
-            })
-            .then((message) => console.log(message.sid));
+          this.twilio.sendSMS(
+            customerPhone,
+            `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
+          );
 
           break;
         case 'DELIVERED':
@@ -362,13 +321,10 @@ export class OriginsService {
             endTime: todayDate,
           });
 
-          client.messages
-            .create({
-              body: `Hello ${customerName}. Your order is at your door. The color of your Skippy is ${skippyColor} :)`,
-              from: '+17633633711',
-              to: customerPhone,
-            })
-            .then((message) => console.log(message.sid));
+          this.twilio.sendSMS(
+            customerPhone,
+            `Hello ${customerName}. Your order is at your door. The color of your Skippy is ${skippyColor} :)`,
+          );
 
           break;
         default:

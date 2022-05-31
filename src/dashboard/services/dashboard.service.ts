@@ -1,10 +1,9 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
+import { DeliverLogicService } from '../../external/services/deliver-logic.service';
 
 @Injectable()
 export class DashboardService {
-  constructor(private http: HttpService) {}
+  constructor(private dl: DeliverLogicService) {}
 
   async getDashboardInfo(): Promise<any> {
     try {
@@ -38,11 +37,7 @@ export class DashboardService {
               .toUpperCase() +
             skippys[skippyIndex].replace('@carbonorigins.com', '').slice(1),
         };
-        const response = await firstValueFrom(
-          this.http.get(
-            `https://www.skippy.cc/api2/drivers/${skippys[skippyIndex]}/orders`,
-          ),
-        );
+        const response = await this.dl.getAllOrdersDriver(skippys[skippyIndex]);
 
         if (response.data.INPROGRESS) {
           const order = response.data.INPROGRESS[0];
