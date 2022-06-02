@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Header } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { DashboardService } from '../services/dashboard.service';
 
@@ -9,6 +9,7 @@ export class DashboardController {
 
   @ApiOperation({ summary: `Get skippys and skipsters information` })
   @Get()
+  @Header('Access-Control-Allow-Origin', '*')
   getDashboardInfo() {
     return this.dashboardService.getDashboardInfo();
   }

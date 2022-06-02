@@ -24,6 +24,7 @@ async function bootstrap(): Promise<Handler> {
   const app = await NestFactory.create(AppModule);
   await app.init();
   setUpSwagger(app);
+  app.enableCors();
   const expressApp = app.getHttpAdapter().getInstance();
   return serverlessExpress({ app: expressApp });
 }
@@ -33,6 +34,6 @@ export const handler: Handler = async (
   context: Context,
   callback: Callback,
 ) => {
-  server = await bootstrap();
+  server = server ?? (await bootstrap());
   return server(event, context, callback);
 };

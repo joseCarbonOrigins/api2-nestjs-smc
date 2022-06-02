@@ -1,6 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 // dtos
 import {
   PickMissionDto,
@@ -9,19 +11,12 @@ import {
 // external services
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
 import { TwilioService } from '../../external/services/twilio.service';
-//schemas
-import { Skipster } from 'src/database/schemas/skipster.schema';
-import { Skip } from 'src/database/schemas/skip.schema';
-import { Mission } from 'src/database/schemas/mission.schema';
-import { Skippy } from 'src/database/schemas/skippy.schema';
+import { OriginsDaoService } from '../data/origins-dao.service';
 
 @Injectable()
 export class OriginsService {
   constructor(
-    @InjectModel(Skipster.name) private skipsterModel: Model<Skipster>,
-    @InjectModel(Skip.name) private skipModel: Model<Skip>,
-    @InjectModel(Mission.name) private missionModel: Model<Mission>,
-    @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
+    private originsData: OriginsDaoService,
     private twilio: TwilioService,
     private dl: DeliverLogicService,
   ) {}
@@ -29,7 +24,9 @@ export class OriginsService {
   async getAvailableMissions(): Promise<any> {
     try {
       // get skippies that not are doing skip
-      const skippies = await this.skippyModel.find({ current_skip_id: null });
+      const skippies = await this.originsData.getSkippys({
+        current_skip_id: null,
+      });
 
       for await (const skippy of skippies) {
         // ask DL to get current order for skippy
@@ -58,18 +55,18 @@ export class OriginsService {
               zip: dlOrder.pickup.ZIP,
             },
           };
-          const newSkip = new this.skipModel({
+          const newSkip = await this.originsData.createSkip({
             startTime: dlOrder.start_time,
             skippy_id: skippy._id,
             order_info: orderInfo,
           });
-          await newSkip.save();
-          await this.skippyModel.findByIdAndUpdate(skippy._id, {
+
+          await this.originsData.updateSkippyById(skippy._id, {
             current_skip_id: newSkip._id,
           });
 
           // slice into missions
-          const newMission1: any = new this.missionModel({
+          const newMission1 = await this.originsData.createMission({
             mission_name: 'Driving to merchant',
             // DUMMY START POINT
             // ADD: experience, coins
@@ -91,7 +88,8 @@ export class OriginsService {
             previous_mission_completed: true,
             previous_mission_id: null,
           });
-          const newMission2 = new this.missionModel({
+          // creating mission 2
+          await this.originsData.createMission({
             mission_name: 'Driving to customer',
             start_point: {
               type: 'Point',
@@ -114,14 +112,11 @@ export class OriginsService {
             previous_mission_completed: false,
             previous_mission_id: newMission1._id,
           });
-          await newMission1.save();
-          await newMission2.save();
         }
       }
 
       // returning incompleted missions
-      const missions = await this.missionModel.find({
-        // TODO: missions that are not assigned to any skipster
+      const missions = await this.originsData.getMissions({
         mission_completed: false,
         previous_mission_completed: true,
         skipster_id: null,
@@ -139,13 +134,12 @@ export class OriginsService {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
       let skipster_id = null;
-
-      const skipster = await this.skipsterModel.findOne({
+      const skipster = await this.originsData.getSkipster({
         nickname: skipster_nickname,
       });
 
       if (!skipster || skipster === null) {
-        const newSkipster = new this.skipsterModel({
+        const newSkipster = await this.originsData.createSkipster({
           nickname: skipster_nickname,
           status: 'busy',
           lastSeen: todayDate,
@@ -154,20 +148,20 @@ export class OriginsService {
           // fake level
           level: 1,
         });
-        await newSkipster.save();
         skipster_id = newSkipster._id;
       } else {
         skipster_id = skipster._id;
       }
 
-      const missionPicked = await this.missionModel.findByIdAndUpdate(
+      const missionPicked = await this.originsData.updateMissionById(
         mission_id,
         {
           skipster_id: skipster_id,
           startTime: todayDate,
         },
       );
-      const skip = await this.skipModel.findById(missionPicked.skip_id);
+
+      const skip = await this.originsData.getSkipById(missionPicked.skip_id);
 
       return {
         mission: missionPicked,
@@ -219,7 +213,7 @@ export class OriginsService {
 
       return responseData;
     } catch (error) {
-      throw new InternalServerErrorException('Error getting skippy order');
+      throw new NotFoundException('Error getting skippy order');
     }
   }
 
@@ -251,7 +245,7 @@ export class OriginsService {
 
       switch (status) {
         case 'ARRIVED':
-          await this.skippyModel.findOneAndUpdate(
+          await this.originsData.updateSkippy(
             { email: skippyname },
             {
               mission: 'waiting merchant',
@@ -259,19 +253,18 @@ export class OriginsService {
               location: newLocation,
             },
           );
+
           // ends 1st mission
-          const endedMission = await this.missionModel.findByIdAndUpdate(
+          const endedMission = await this.originsData.updateMissionById(
             mission_id,
-            {
-              mission_completed: true,
-              endTime: todayDate,
-            },
+            { mission_completed: true, endTime: todayDate },
           );
-          await this.missionModel.findOneAndUpdate(
-            { previous_mission_id: endedMission._id },
+
+          await this.originsData.updateMission(
             {
-              previous_mission_completed: true,
+              previous_mission_id: endedMission._id,
             },
+            { previous_mission_completed: true },
           );
 
           this.twilio.makeACall(
@@ -285,7 +278,7 @@ export class OriginsService {
           );
           break;
         case 'ENROUTE':
-          await this.skippyModel.findOneAndUpdate(
+          await this.originsData.updateSkippy(
             { email: skippyname },
             {
               mission: 'driving delivery',
@@ -293,8 +286,9 @@ export class OriginsService {
               location: newLocation,
             },
           );
+
           // starts 2nd mission
-          await this.missionModel.findByIdAndUpdate(mission_id, {
+          await this.originsData.updateMissionById(mission_id, {
             startTime: todayDate,
           });
 
@@ -305,7 +299,7 @@ export class OriginsService {
 
           break;
         case 'DELIVERED':
-          await this.skippyModel.findOneAndUpdate(
+          await this.originsData.updateSkippy(
             { email: skippyname },
             {
               mission: 'waiting delivery',
@@ -316,7 +310,7 @@ export class OriginsService {
           );
 
           // ends 2nd mission
-          await this.missionModel.findByIdAndUpdate(mission_id, {
+          await this.originsData.updateMissionById(mission_id, {
             mission_completed: true,
             endTime: todayDate,
           });
@@ -332,7 +326,65 @@ export class OriginsService {
       }
       return updateStatusJson;
     } catch (error) {
-      throw new InternalServerErrorException('Error updating order status');
+      throw new NotFoundException('Error updating order status');
+    }
+  }
+
+  async oldUpdateOrderStatus(
+    skippyname: string,
+    orderid: number,
+    status: string,
+  ) {
+    try {
+      const updatedStatus = await this.dl.updateOrderStatus(
+        skippyname,
+        orderid,
+        status,
+      );
+      const updateStatusJson = updatedStatus.data;
+
+      const getOrder = await this.dl.getAnOrder(skippyname, orderid);
+      const getOrderInfo = getOrder.data;
+
+      const getDriver = await this.dl.getDriverInfo(skippyname);
+      const getDriverInfo = getDriver.data;
+
+      const restaurantPhone = `+1${getOrderInfo.restaurant[0].PHONE}`;
+      const customerPhone = `+1${getOrderInfo.user.PHONE}`;
+      const customerName = `${getOrderInfo.user.FNAME}`;
+      const skippyColor = `${getDriverInfo.lname}`;
+
+      switch (status) {
+        case 'ARRIVED':
+          if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
+            this.twilio.makeACall(
+              restaurantPhone,
+              'Hello. Skippy. is at your restaurant',
+            );
+          }
+          this.twilio.sendSMS(
+            customerPhone,
+            `Hello ${customerName}. Skippy arrived to the restaurant.`,
+          );
+          break;
+        case 'ENROUTE':
+          this.twilio.sendSMS(
+            customerPhone,
+            `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
+          );
+          break;
+        case 'DELIVERED':
+          this.twilio.sendSMS(
+            customerPhone,
+            `Hello ${customerName}. Your order is at your door. The color of your Skippy is ${skippyColor} :)`,
+          );
+          break;
+        default:
+      }
+
+      return updateStatusJson;
+    } catch (e) {
+      throw new NotFoundException('Error updating order status');
     }
   }
 }
