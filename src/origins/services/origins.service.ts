@@ -7,6 +7,7 @@ import {
 import {
   PickMissionDto,
   UpdateMissionOrderStatusDto,
+  UpdateMissionStatus,
 } from '../dtos/missions.dto';
 // external services
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
@@ -66,6 +67,7 @@ export class OriginsService {
           });
 
           // slice into missions
+          // creating mission-1
           const newMission1 = await this.originsData.createMission({
             mission_name: 'Driving to merchant',
             // DUMMY START POINT
@@ -88,8 +90,8 @@ export class OriginsService {
             previous_mission_completed: true,
             previous_mission_id: null,
           });
-          // creating mission 2
-          await this.originsData.createMission({
+          // creating mission-2
+          const newMission2 = await this.originsData.createMission({
             mission_name: 'Driving to customer',
             start_point: {
               type: 'Point',
@@ -111,6 +113,32 @@ export class OriginsService {
             mission_completed: false,
             previous_mission_completed: false,
             previous_mission_id: newMission1._id,
+          });
+
+          // creating mission-3
+          await this.originsData.createMission({
+            mission_name: 'Back to Home',
+            start_point: {
+              type: 'Point',
+              coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
+            },
+            ending_point: {
+              type: 'Point',
+              coordinates: [45.0004353, -93.2705556],
+            },
+            start_address_name: dlOrder.dropoff.ADDRESS1,
+            ending_address_name:
+              '1317 County Rd 23, Minneapolis, MN 55413, USA',
+            skip_id: newSkip._id,
+
+            // fake values
+            mission_xp: 15,
+            mission_coins: 15,
+            estimated_time: 900,
+
+            mission_completed: false,
+            previous_mission_completed: false,
+            previous_mission_id: newMission2._id,
           });
         }
       }
@@ -139,6 +167,7 @@ export class OriginsService {
       });
 
       if (!skipster || skipster === null) {
+        // creates new skipster
         const newSkipster = await this.originsData.createSkipster({
           nickname: skipster_nickname,
           status: 'busy',
@@ -153,22 +182,40 @@ export class OriginsService {
         skipster_id = skipster._id;
       }
 
-      const missionPicked = await this.originsData.updateMissionById(
-        mission_id,
+      // update mission to taken
+      // const missionPicked = await this.originsData.updateMissionById(
+      //   mission_id,
+      //   {
+      //     skipster_id: skipster_id,
+      //     startTime: todayDate,
+      //   },
+      // );
+      // const skip = await this.originsData.getSkipById(missionPicked.skip_id);
+      // return {
+      //   mission: missionPicked,
+      //   order_id: skip.order_info.order_id,
+      // };
+      const missionPicked = await this.originsData.updateMission(
+        {
+          _id: mission_id,
+          skipster_id: null,
+        },
         {
           skipster_id: skipster_id,
           startTime: todayDate,
         },
       );
 
+      if (!missionPicked) {
+        throw new NotFoundException('Mission already picked');
+      }
       const skip = await this.originsData.getSkipById(missionPicked.skip_id);
-
       return {
         mission: missionPicked,
         order_id: skip.order_info.order_id,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Error on picking a mission');
+      throw new NotFoundException('Mission not picked');
     }
   }
 
@@ -255,17 +302,17 @@ export class OriginsService {
           );
 
           // ends 1st mission
-          const endedMission = await this.originsData.updateMissionById(
-            mission_id,
-            { mission_completed: true, endTime: todayDate },
-          );
+          // const endedMission = await this.originsData.updateMissionById(
+          //   mission_id,
+          //   { mission_completed: true, endTime: todayDate },
+          // );
 
-          await this.originsData.updateMission(
-            {
-              previous_mission_id: endedMission._id,
-            },
-            { previous_mission_completed: true },
-          );
+          // await this.originsData.updateMission(
+          //   {
+          //     previous_mission_id: endedMission._id,
+          //   },
+          //   { previous_mission_completed: true },
+          // );
 
           this.twilio.makeACall(
             restaurantPhone,
@@ -310,10 +357,10 @@ export class OriginsService {
           );
 
           // ends 2nd mission
-          await this.originsData.updateMissionById(mission_id, {
-            mission_completed: true,
-            endTime: todayDate,
-          });
+          // await this.originsData.updateMissionById(mission_id, {
+          //   mission_completed: true,
+          //   endTime: todayDate,
+          // });
 
           this.twilio.sendSMS(
             customerPhone,
@@ -326,6 +373,68 @@ export class OriginsService {
       }
       return updateStatusJson;
     } catch (error) {
+      throw new NotFoundException('Error updating order status');
+    }
+  }
+
+  // end mission-1
+  async foodPlaced(payload: UpdateMissionStatus) {
+    try {
+      const { mission_id } = payload;
+      const todayDate = new Date();
+
+      const endedMission = await this.originsData.updateMissionById(
+        mission_id,
+        { mission_completed: true, endTime: todayDate },
+      );
+
+      await this.originsData.updateMission(
+        {
+          previous_mission_id: endedMission._id,
+        },
+        { previous_mission_completed: true },
+      );
+    } catch (e) {
+      throw new NotFoundException('Error updating order status');
+    }
+  }
+
+  // end mission-2
+  async foodDelivered(payload: UpdateMissionStatus) {
+    try {
+      const { mission_id } = payload;
+      const todayDate = new Date();
+
+      const endedMission = await this.originsData.updateMissionById(
+        mission_id,
+        {
+          mission_completed: true,
+          endTime: todayDate,
+        },
+      );
+
+      await this.originsData.updateMission(
+        {
+          previous_mission_id: endedMission._id,
+        },
+        { previous_mission_completed: true },
+      );
+    } catch (e) {
+      throw new NotFoundException('Error updating order status');
+    }
+  }
+
+  // end mission-3
+  async backToHome(payload: UpdateMissionStatus) {
+    try {
+      const { mission_id } = payload;
+      const todayDate = new Date();
+
+      await this.originsData.updateMissionById(mission_id, {
+        mission_completed: true,
+        endTime: todayDate,
+      });
+    } catch (e) {
       throw new NotFoundException('Error updating order status');
     }
   }

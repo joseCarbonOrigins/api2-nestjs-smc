@@ -79,6 +79,9 @@ export class MissionUpdate {
 }
 
 export class MissionsQuery {
+  @IsString()
+  _id?: string;
+
   @IsBoolean()
   mission_completed?: boolean;
 

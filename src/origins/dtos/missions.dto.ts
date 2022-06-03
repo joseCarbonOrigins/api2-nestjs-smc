@@ -51,3 +51,10 @@ export class UpdateMissionOrderStatusDto {
   @ApiProperty()
   readonly mission_id: string;
 }
+
+export class UpdateMissionStatus {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly mission_id: string;
+}

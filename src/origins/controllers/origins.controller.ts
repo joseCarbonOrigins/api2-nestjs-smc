@@ -14,6 +14,7 @@ import { OriginsService } from '../services/origins.service';
 import {
   PickMissionDto,
   UpdateMissionOrderStatusDto,
+  UpdateMissionStatus,
 } from '../dtos/missions.dto';
 
 @ApiTags('Origins')
@@ -62,5 +63,34 @@ export class OriginsController {
       orderid,
       status,
     );
+  }
+
+  @ApiOperation({
+    summary: 'When food is placed. This endpoint will end mission-1',
+  })
+  @Patch('missions/food-placed')
+  @Header('Access-Control-Allow-Origin', '*')
+  foodPlaced(@Body() payload: UpdateMissionStatus) {
+    return this.originsService.foodPlaced(payload);
+  }
+
+  @ApiOperation({
+    summary:
+      'When food is delivered to customer. This endpoint will end mission-2',
+  })
+  @Patch('missions/food-delivered')
+  @Header('Access-Control-Allow-Origin', '*')
+  foodDelivered(@Body() payload: UpdateMissionStatus) {
+    return this.originsService.foodDelivered(payload);
+  }
+
+  @ApiOperation({
+    summary:
+      'When skippy arrieved Twin Ignition (home). This endpoint will end mission-3',
+  })
+  @Patch('missions/back-to-home')
+  @Header('Access-Control-Allow-Origin', '*')
+  backToHome(@Body() payload: UpdateMissionStatus) {
+    return this.originsService.backToHome(payload);
   }
 }
