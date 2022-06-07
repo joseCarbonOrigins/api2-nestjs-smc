@@ -28,7 +28,14 @@ export class OriginsDaoService {
   ) {}
 
   async getMissions(data: MissionsQuery): Promise<any> {
-    const missions = await this.missionModel.find(data);
+    const missions = await this.missionModel.find(data).populate({
+      path: 'skip_id',
+      select: 'skippy_id -_id',
+      populate: {
+        path: 'skippy_id',
+        select: 'name email -_id',
+      },
+    });
     return missions;
   }
 

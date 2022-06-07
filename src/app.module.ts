@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 
 import { environments } from './environments';
 import { ExternalModule } from './external/external.module';
+import { CronjobModule } from './cronjob/cronjob.module';
 import config from './config';
 
 @Module({
@@ -27,6 +28,7 @@ import config from './config';
     DashboardModule,
     DatabaseModule,
     ExternalModule,
+    CronjobModule,
   ],
   controllers: [AppController],
   providers: [AppService],

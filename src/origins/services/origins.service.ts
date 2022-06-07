@@ -496,4 +496,19 @@ export class OriginsService {
       throw new NotFoundException('Error updating order status');
     }
   }
+
+  // async test(): Promise<any> {
+  //   try {
+  //     const missions = await this.originsData.getMissions({
+  //       // mission_completed: false,
+  //       // previous_mission_completed: true,
+  //       // skipster_id: null,
+  //     });
+
+  //     return missions;
+  //   } catch (error) {
+  //     console.log('error: ', error);
+  //     throw new InternalServerErrorException('Error getting all missions');
+  //   }
+  // }
 }

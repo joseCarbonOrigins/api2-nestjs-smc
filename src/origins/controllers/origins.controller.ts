@@ -93,4 +93,10 @@ export class OriginsController {
   backToHome(@Body() payload: UpdateMissionStatus) {
     return this.originsService.backToHome(payload);
   }
+
+  // @Get('test')
+  // @Header('Access-Control-Allow-Origin', '*')
+  // test() {
+  //   return this.originsService.test();
+  // }
 }
