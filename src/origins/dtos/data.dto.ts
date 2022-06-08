@@ -139,6 +139,10 @@ export class MissionCreate {
   @IsNotEmpty()
   @IsString()
   previous_mission_id: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  mock: boolean;
 }
 
 export class SkipCreate {
@@ -152,6 +156,10 @@ export class SkipCreate {
 
   @IsNotEmpty()
   order_info: OrderInfo;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  mock: boolean;
 }
 
 // +++++++++++++++++++++++++++=

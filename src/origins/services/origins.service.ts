@@ -60,6 +60,7 @@ export class OriginsService {
             startTime: dlOrder.start_time,
             skippy_id: skippy._id,
             order_info: orderInfo,
+            mock: false,
           });
 
           await this.originsData.updateSkippyById(skippy._id, {
@@ -89,6 +90,7 @@ export class OriginsService {
             mission_completed: false,
             previous_mission_completed: true,
             previous_mission_id: null,
+            mock: false,
           });
           // creating mission-2
           const newMission2 = await this.originsData.createMission({
@@ -113,11 +115,12 @@ export class OriginsService {
             mission_completed: false,
             previous_mission_completed: false,
             previous_mission_id: newMission1._id,
+            mock: false,
           });
 
           // creating mission-3
           await this.originsData.createMission({
-            mission_name: 'Back to Home',
+            mission_name: 'Driving Home',
             start_point: {
               type: 'Point',
               coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
@@ -139,6 +142,7 @@ export class OriginsService {
             mission_completed: false,
             previous_mission_completed: false,
             previous_mission_id: newMission2._id,
+            mock: false,
           });
         }
       }
@@ -153,7 +157,7 @@ export class OriginsService {
       return missions;
     } catch (error) {
       console.log('error: ', error);
-      throw new InternalServerErrorException('Error getting all missions');
+      throw new NotFoundException('Error getting all missions');
     }
   }
 
@@ -301,19 +305,6 @@ export class OriginsService {
             },
           );
 
-          // ends 1st mission
-          // const endedMission = await this.originsData.updateMissionById(
-          //   mission_id,
-          //   { mission_completed: true, endTime: todayDate },
-          // );
-
-          // await this.originsData.updateMission(
-          //   {
-          //     previous_mission_id: endedMission._id,
-          //   },
-          //   { previous_mission_completed: true },
-          // );
-
           this.twilio.makeACall(
             restaurantPhone,
             'Hello. Skippy. is at your restaurant',
@@ -356,12 +347,6 @@ export class OriginsService {
             },
           );
 
-          // ends 2nd mission
-          // await this.originsData.updateMissionById(mission_id, {
-          //   mission_completed: true,
-          //   endTime: todayDate,
-          // });
-
           this.twilio.sendSMS(
             customerPhone,
             `Hello ${customerName}. Your order is at your door. The color of your Skippy is ${skippyColor} :)`,
@@ -394,6 +379,8 @@ export class OriginsService {
         },
         { previous_mission_completed: true },
       );
+
+      return { message: 'mission ended' };
     } catch (e) {
       throw new NotFoundException('Error updating order status');
     }
@@ -419,6 +406,8 @@ export class OriginsService {
         },
         { previous_mission_completed: true },
       );
+
+      return { message: 'mission ended' };
     } catch (e) {
       throw new NotFoundException('Error updating order status');
     }
@@ -430,10 +419,24 @@ export class OriginsService {
       const { mission_id } = payload;
       const todayDate = new Date();
 
-      await this.originsData.updateMissionById(mission_id, {
-        mission_completed: true,
-        endTime: todayDate,
-      });
+      const endedMission = await this.originsData.updateMissionById(
+        mission_id,
+        {
+          mission_completed: true,
+          endTime: todayDate,
+        },
+      );
+
+      await this.originsData.updateSkippy(
+        {
+          current_skip_id: endedMission.skip_id,
+        },
+        {
+          current_skip_id: null,
+        },
+      );
+
+      return { message: 'mission ended' };
     } catch (e) {
       throw new NotFoundException('Error updating order status');
     }

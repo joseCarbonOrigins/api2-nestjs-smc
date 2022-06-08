@@ -76,6 +76,9 @@ export class Skip extends Document {
 
   @Prop({ type: Types.ObjectId, ref: Skippy.name, required: true })
   skippy_id: Skippy | Types.ObjectId;
+
+  @Prop({ default: false })
+  mock: boolean;
 }
 
 export const SkipSchema = SchemaFactory.createForClass(Skip);

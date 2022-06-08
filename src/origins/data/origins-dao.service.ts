@@ -81,8 +81,7 @@ export class OriginsDaoService {
     findParam: SkippysQuery,
     data: SkippyUpdate,
   ): Promise<any> {
-    const skippy = await this.skippyModel.findOne(findParam, data);
-    await skippy.update(data);
+    const skippy = await this.skippyModel.updateOne(findParam, data);
     return skippy;
   }
 

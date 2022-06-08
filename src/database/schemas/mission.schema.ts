@@ -74,6 +74,9 @@ export class Mission extends Document {
 
   @Prop({ type: Types.ObjectId, ref: Mission.name })
   previous_mission_id: Mission | Types.ObjectId;
+
+  @Prop({ default: false })
+  mock: boolean;
 }
 
 export const MissionSchema = SchemaFactory.createForClass(Mission);
