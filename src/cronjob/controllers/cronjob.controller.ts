@@ -12,7 +12,7 @@ export class CronjobController {
   @ApiOperation({ summary: 'Receive skippys orders' })
   @Post('orders')
   @Header('Access-Control-Allow-Origin', '*')
-  pushSkippysOrders(@Body() orders: Cronjob[]) {
-    return this.cronjobService.pushSkippysOrders(orders);
+  pushSkippysOrders(@Body() payload: Cronjob) {
+    return this.cronjobService.pushSkippysOrders(payload);
   }
 }

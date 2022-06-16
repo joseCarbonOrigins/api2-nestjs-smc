@@ -24,6 +24,17 @@ export class PickMissionDto {
   @ApiProperty()
   readonly skipster_nickname: string;
 }
+export class AcceptDeclineMissionDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly mission_id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly skipster_nickname: string;
+}
 
 export class UpdateMissionOrderStatusDto {
   @IsString()

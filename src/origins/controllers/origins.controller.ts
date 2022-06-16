@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Put,
+  Post,
   Header,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
@@ -15,6 +16,7 @@ import {
   PickMissionDto,
   UpdateMissionOrderStatusDto,
   UpdateMissionStatus,
+  AcceptDeclineMissionDto,
 } from '../dtos/missions.dto';
 
 @ApiTags('Origins')
@@ -89,9 +91,30 @@ export class OriginsController {
       'When skippy arrieved Twin Ignition (home). This endpoint will end mission-3',
   })
   @Patch('missions/back-to-home')
-  @Header('Access-Control-Allow-Origin', '*')
+  @Header('Access- Control-Allow-Origin', '*')
   backToHome(@Body() payload: UpdateMissionStatus) {
     return this.originsService.backToHome(payload);
+  }
+
+  @ApiOperation({ summary: 'Unassign a mission' })
+  @Post('missions/unassign')
+  @Header('Access-Control-Allow-Origin', '*')
+  unassignMission(@Body() payload: UpdateMissionStatus) {
+    return this.originsService.unassignMission(payload);
+  }
+
+  @ApiOperation({ summary: 'Accept a mission' })
+  @Post('missions/accept')
+  @Header('Access-Control-Allow-Origin', '*')
+  acceptMission(@Body() payload: AcceptDeclineMissionDto) {
+    return this.originsService.acceptMission(payload);
+  }
+
+  @ApiOperation({ summary: 'Decline a mission' })
+  @Post('missions/decline')
+  @Header('Access-Control-Allow-Origin', '*')
+  declineMission(@Body() payload: AcceptDeclineMissionDto) {
+    return this.originsService.declineMission(payload);
   }
 
   // @Get('test')

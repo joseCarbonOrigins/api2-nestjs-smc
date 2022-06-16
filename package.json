@@ -30,6 +30,7 @@
     "@nestjs/swagger": "^5.2.1",
     "@vendia/serverless-express": "^4.8.0",
     "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1152.0",
     "axios": "^0.27.2",
     "class-validator": "^0.13.2",
     "joi": "^17.6.0",
@@ -41,6 +42,7 @@
     "twilio": "^3.77.1"
   },
   "devDependencies": {
+    "@aws-sdk/types": "^3.78.0",
     "@nestjs/cli": "^8.0.0",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",

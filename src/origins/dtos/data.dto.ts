@@ -143,6 +143,15 @@ export class MissionCreate {
   @IsNotEmpty()
   @IsBoolean()
   mock: boolean;
+
+  @IsDate()
+  startTime?: Date;
+
+  @IsDate()
+  endTime?: Date;
+
+  @IsString()
+  skipster_id?: string;
 }
 
 export class SkipCreate {

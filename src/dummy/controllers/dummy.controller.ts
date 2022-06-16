@@ -4,10 +4,10 @@ import { DummyService } from '../services/dummy.service';
 
 @Controller('dummy')
 export class DummyController {
-  constructor(private dumyyService: DummyService) {}
+  constructor(private dumyService: DummyService) {}
 
   @Post('missions')
-  getAvailableMissions(@Body() payload: any) {
-    return this.dumyyService.getAvailableMissions(payload);
+  createDummyMissions(@Body() payload: any) {
+    return this.dumyService.createDummyMissions(payload);
   }
 }

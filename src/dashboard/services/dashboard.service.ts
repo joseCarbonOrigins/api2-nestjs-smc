@@ -1,9 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
+// schemas
+import { Mission } from '../../database/schemas/mission.schema';
+import { Skippy } from '../../database/schemas/skippy.schema';
+// dto
+import { MissionQueryDto } from '../dto/missions.dto';
 
 @Injectable()
 export class DashboardService {
-  constructor(private dl: DeliverLogicService) {}
+  constructor(
+    @InjectModel(Mission.name) private missionModel: Model<Mission>,
+    @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
+    private dl: DeliverLogicService,
+  ) {}
 
   async getDashboardInfo(): Promise<any> {
     try {
@@ -85,6 +96,71 @@ export class DashboardService {
     } catch (error) {
       console.log(error);
       return { error: 'error' };
+    }
+  }
+
+  async getMissions(skip: number): Promise<any> {
+    try {
+      const missions = await this.missionModel
+        .find({})
+        .select('_id mission_name mock startTime endTime mission_completed')
+        .limit(10)
+        .skip(skip)
+        .sort({ _id: 'desc' })
+        .populate({
+          path: 'skipster_id',
+          select: 'nickname -_id',
+        })
+        .populate({
+          path: 'skip_id',
+          select: 'skippy_id -_id',
+          populate: {
+            path: 'skippy_id',
+            select: 'name -_id',
+          },
+        });
+
+      const response = {
+        data: missions,
+      };
+
+      return response;
+    } catch (e) {
+      throw new NotFoundException('Could not find missions');
+    }
+  }
+
+  async forceFinishMissions(body: MissionQueryDto): Promise<any> {
+    try {
+      const { mission_id } = body;
+
+      const finishedMission = await this.missionModel.findByIdAndUpdate(
+        mission_id,
+        {
+          mission_completed: true,
+        },
+      );
+      const previousMission = await this.missionModel.findOneAndUpdate(
+        {
+          previous_mission_id: finishedMission._id,
+        },
+        { previous_mission_completed: true },
+      );
+
+      if (previousMission === null) {
+        await this.skippyModel.findOneAndUpdate(
+          {
+            current_skip_id: finishedMission.skip_id,
+          },
+          {
+            current_skip_id: null,
+          },
+        );
+      }
+
+      return { message: 'mission finished' };
+    } catch (e) {
+      throw new NotFoundException('Could not force finish mission');
     }
   }
 }

@@ -4,28 +4,35 @@ import { Model } from 'mongoose';
 //schemas
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
+import { Skip } from '../../database/schemas/skip.schema';
 
 @Injectable()
 export class DummyService {
   constructor(
+    @InjectModel(Skip.name) private skipModel: Model<Skip>,
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
   ) {}
 
-  async getAvailableMissions(payload: any): Promise<any> {
+  async createDummyMissions(payload: any): Promise<any> {
     const { customerInfo, restaurantInfo, skippyName } = payload;
 
     try {
+      const today = new Date();
+      const skippy = await this.skippyModel.findOne({
+        email: skippyName,
+        current_skip_id: null,
+      });
       // get skippies that not are doing skip
       const orderInfo = {
         order_id: 99,
         status: 'placed',
         customer: {
-          firstName: customerInfo.firstName,
-          lastName: customerInfo.lastName,
+          firstName: 'Dummy Customer',
+          lastName: 'Dummy Customer',
           lat: customerInfo.lat,
           long: customerInfo.long,
-          address: customerInfo.address,
+          address: 'customer .address',
           zip: 55413,
         },
         restaurant: {
@@ -35,16 +42,19 @@ export class DummyService {
           address: restaurantInfo.address,
           zip: 55413,
         },
-        mock: true,
       };
 
-      const newSkip = new this.skippyModel(orderInfo);
+      const newSkip = new this.skipModel({
+        startTime: today,
+        skippy_id: skippy._id,
+        order_info: orderInfo,
+        mock: true,
+      });
       await newSkip.save();
 
-      await this.skippyModel.findOneAndUpdate(
-        { email: skippyName },
-        { current_skip_id: newSkip._id },
-      );
+      await this.skippyModel.findByIdAndUpdate(skippy._id, {
+        current_skip_id: newSkip._id,
+      });
 
       // slice into missions
       // creating mission-1
@@ -74,6 +84,10 @@ export class DummyService {
         previous_mission_completed: true,
         previous_mission_id: null,
         mock: true,
+
+        startTime: null,
+        endTime: null,
+        skipster_id: null,
       });
 
       // creating mission-2
@@ -88,7 +102,7 @@ export class DummyService {
           coordinates: [customerInfo.lat, customerInfo.long],
         },
         start_address_name: restaurantInfo.address,
-        ending_address_name: customerInfo.address,
+        ending_address_name: 'customer address',
         skip_id: newSkip._id,
 
         // fake values
@@ -100,6 +114,10 @@ export class DummyService {
         previous_mission_completed: false,
         previous_mission_id: newMission1._id,
         mock: true,
+
+        startTime: null,
+        endTime: null,
+        skipster_id: null,
       });
 
       // creating mission-3
@@ -113,7 +131,7 @@ export class DummyService {
           type: 'Point',
           coordinates: [45.0004353, -93.2705556],
         },
-        start_address_name: customerInfo.address,
+        start_address_name: 'customer address',
         ending_address_name: '1317 County Rd 23, Minneapolis, MN 55413, USA',
         skip_id: newSkip._id,
 
@@ -126,16 +144,20 @@ export class DummyService {
         previous_mission_completed: false,
         previous_mission_id: newMission2._id,
         mock: true,
+
+        startTime: null,
+        endTime: null,
+        skipster_id: null,
       });
 
       await newMission1.save();
       await newMission2.save();
       await newMission3.save();
 
-      return { message: 'missions created' };
+      return { message: 'missions created', success: true };
     } catch (error) {
       console.log('error: ', error);
-      throw new NotFoundException('Error getting all missions');
+      throw new NotFoundException('Error creating dummy missions');
     }
   }
 }

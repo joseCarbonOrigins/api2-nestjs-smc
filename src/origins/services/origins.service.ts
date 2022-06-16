@@ -1,13 +1,12 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+// aws
+import { LambdaService } from '../../external/services/lambda.service';
 // dtos
 import {
   PickMissionDto,
   UpdateMissionOrderStatusDto,
   UpdateMissionStatus,
+  AcceptDeclineMissionDto,
 } from '../dtos/missions.dto';
 // external services
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
@@ -20,6 +19,7 @@ export class OriginsService {
     private originsData: OriginsDaoService,
     private twilio: TwilioService,
     private dl: DeliverLogicService,
+    private lambdaService: LambdaService,
   ) {}
 
   async getAvailableMissions(): Promise<any> {
@@ -91,6 +91,10 @@ export class OriginsService {
             previous_mission_completed: true,
             previous_mission_id: null,
             mock: false,
+
+            startTime: null,
+            endTime: null,
+            skipster_id: null,
           });
           // creating mission-2
           const newMission2 = await this.originsData.createMission({
@@ -116,6 +120,10 @@ export class OriginsService {
             previous_mission_completed: false,
             previous_mission_id: newMission1._id,
             mock: false,
+
+            startTime: null,
+            endTime: null,
+            skipster_id: null,
           });
 
           // creating mission-3
@@ -143,6 +151,10 @@ export class OriginsService {
             previous_mission_completed: false,
             previous_mission_id: newMission2._id,
             mock: false,
+
+            startTime: null,
+            endTime: null,
+            skipster_id: null,
           });
         }
       }
@@ -185,20 +197,6 @@ export class OriginsService {
       } else {
         skipster_id = skipster._id;
       }
-
-      // update mission to taken
-      // const missionPicked = await this.originsData.updateMissionById(
-      //   mission_id,
-      //   {
-      //     skipster_id: skipster_id,
-      //     startTime: todayDate,
-      //   },
-      // );
-      // const skip = await this.originsData.getSkipById(missionPicked.skip_id);
-      // return {
-      //   mission: missionPicked,
-      //   order_id: skip.order_info.order_id,
-      // };
       const missionPicked = await this.originsData.updateMission(
         {
           _id: mission_id,
@@ -497,6 +495,102 @@ export class OriginsService {
       return updateStatusJson;
     } catch (e) {
       throw new NotFoundException('Error updating order status');
+    }
+  }
+
+  async unassignMission(payload: UpdateMissionStatus): Promise<any> {
+    try {
+      const { mission_id } = payload;
+      await this.originsData.updateMissionById(mission_id, {
+        skipster_id: null,
+      });
+
+      return { message: 'mission unassigned' };
+    } catch (error) {
+      throw new NotFoundException('Error updating order status');
+    }
+  }
+
+  async acceptMission(payload: AcceptDeclineMissionDto): Promise<any> {
+    try {
+      // TODO: update mission on our DB
+      const { mission_id, skipster_nickname } = payload;
+      // const todayDate = new Date();
+      // let skipster_id = null;
+      // const skipster = await this.originsData.getSkipster({
+      //   nickname: skipster_nickname,
+      // });
+
+      // if (!skipster || skipster === null) {
+      //   // creates new skipster
+      //   const newSkipster = await this.originsData.createSkipster({
+      //     nickname: skipster_nickname,
+      //     status: 'busy',
+      //     lastSeen: todayDate,
+      //     // fake experience
+      //     experience: 10,
+      //     // fake level
+      //     level: 1,
+      //   });
+      //   skipster_id = newSkipster._id;
+      // } else {
+      //   skipster_id = skipster._id;
+      // }
+      // // pick/accept mission if mission is not picked/accepted
+      // const missionPicked = await this.originsData.updateMission(
+      //   {
+      //     _id: mission_id,
+      //     skipster_id: null,
+      //   },
+      //   {
+      //     skipster_id: skipster_id,
+      //     startTime: todayDate,
+      //   },
+      // );
+
+      // if (!missionPicked) {
+      //   // throw error if mission is picked/accepted by someone else
+      //   throw new NotFoundException('Mission already picked');
+      // }
+      // const skip = await this.originsData.getSkipById(missionPicked.skip_id);
+      // TODO: call lambda function
+      const lambdaPayload = {
+        case: 'accept_mission',
+        skipster: {
+          name: skipster_nickname,
+        },
+        mission: {
+          id: mission_id,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
+      return { message: 'mission accepted' };
+      // return {
+      //   mission: missionPicked,
+      //   order_id: skip.order_info.order_id,
+      // };
+    } catch (error) {
+      throw new NotFoundException('Error accepting the mission');
+    }
+  }
+
+  async declineMission(payload: AcceptDeclineMissionDto): Promise<any> {
+    try {
+      // TODO: call lambda function, send the mission for someone else
+      const { mission_id, skipster_nickname } = payload;
+      const lambdaPayload = {
+        case: 'decline_mission',
+        skipster: {
+          name: skipster_nickname,
+        },
+        mission: {
+          id: mission_id,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
+      return { message: 'mission declined' };
+    } catch (error) {
+      throw new NotFoundException('Error declining the mission');
     }
   }
 

@@ -14,26 +14,6 @@ export class Cronjob {
   orders: Order[];
 }
 
-class Order {
-  @IsNotEmpty()
-  @IsEmail()
-  @ApiProperty()
-  skippyEmail: string;
-
-  @ApiProperty()
-  customer?: Customer;
-
-  @ApiProperty()
-  restaurant?: Restaurant;
-
-  @ApiProperty()
-  orderInfo?: orderInfo;
-
-  @IsBoolean()
-  @ApiProperty()
-  data?: boolean;
-}
-
 class Customer {
   @IsNotEmpty()
   @IsString()
@@ -113,4 +93,24 @@ class orderInfo {
   @IsDate()
   @ApiProperty()
   orderduetime: Date;
+}
+
+class Order {
+  @IsNotEmpty()
+  @IsEmail()
+  @ApiProperty()
+  skippyEmail: string;
+
+  @ApiProperty()
+  customer?: Customer;
+
+  @ApiProperty()
+  restaurant?: Restaurant;
+
+  @ApiProperty()
+  orderInfo?: orderInfo;
+
+  @IsBoolean()
+  @ApiProperty()
+  data?: boolean;
 }
