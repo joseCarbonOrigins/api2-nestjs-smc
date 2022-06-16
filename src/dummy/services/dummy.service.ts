@@ -32,7 +32,7 @@ export class DummyService {
           lastName: 'Dummy Customer',
           lat: customerInfo.lat,
           long: customerInfo.long,
-          address: 'customer .address',
+          address: customerInfo.address,
           zip: 55413,
         },
         restaurant: {
@@ -102,7 +102,7 @@ export class DummyService {
           coordinates: [customerInfo.lat, customerInfo.long],
         },
         start_address_name: restaurantInfo.address,
-        ending_address_name: 'customer address',
+        ending_address_name: customerInfo.address,
         skip_id: newSkip._id,
 
         // fake values
@@ -131,7 +131,7 @@ export class DummyService {
           type: 'Point',
           coordinates: [45.0004353, -93.2705556],
         },
-        start_address_name: 'customer address',
+        start_address_name: customerInfo.address,
         ending_address_name: '1317 County Rd 23, Minneapolis, MN 55413, USA',
         skip_id: newSkip._id,
 
