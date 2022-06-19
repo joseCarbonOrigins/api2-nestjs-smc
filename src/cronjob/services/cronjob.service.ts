@@ -30,8 +30,8 @@ export class CronjobService {
           });
           // if skippy is not busy
           if (isSkippyNotBusy) {
-            // TODO: +++ SLICE ORDER IN MISSIONS +++
-            // await this.sliceMissions(order, today, isSkippyNotBusy);
+            // slice order into missions
+            await this.sliceMissions(order, today, isSkippyNotBusy);
           }
         }
       }
@@ -48,24 +48,7 @@ export class CronjobService {
         missions: missions,
       };
 
-      // TODO: +++ EXECUTE MISSION HANDLER LAMBDA FUNCTION +++
-      // const response: any = { message: 'success' };
-      // const params = {
-      //   FunctionName: 'ws-MA-missionHandler', // the lambda function we are going to invoke
-      //   InvocationType: 'RequestResponse',
-      //   LogType: 'Tail',
-      //   Payload: JSON.stringify(lambdaPayload),
-      // };
-      // AWS.config.region = 'us-east-1';
-      // const lambdaFunction = new AWS.Lambda();
-      // lambdaFunction.invoke(params, function (err, data) {
-      //   if (err) {
-      //     console.log(err);
-      //   } else {
-      //     console.log(data);
-      //   }
-      // });
-
+      // excecute lambda function
       this.lambdaService.invokeLambda(lambdaPayload);
 
       return payload;
