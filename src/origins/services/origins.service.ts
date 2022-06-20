@@ -363,7 +363,7 @@ export class OriginsService {
   // end mission-1
   async foodPlaced(payload: UpdateMissionStatus) {
     try {
-      const { mission_id } = payload;
+      const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
 
       const endedMission = await this.originsData.updateMissionById(
@@ -378,6 +378,18 @@ export class OriginsService {
         { previous_mission_completed: true },
       );
 
+      //  call lambda function
+      const lambdaPayload = {
+        case: 'end_mission',
+        mission: {
+          id: mission_id,
+        },
+        skipster: {
+          name: skipster_nickname,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
+
       return { message: 'mission ended' };
     } catch (e) {
       throw new NotFoundException('Error updating order status');
@@ -387,7 +399,7 @@ export class OriginsService {
   // end mission-2
   async foodDelivered(payload: UpdateMissionStatus) {
     try {
-      const { mission_id } = payload;
+      const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
 
       const endedMission = await this.originsData.updateMissionById(
@@ -405,6 +417,18 @@ export class OriginsService {
         { previous_mission_completed: true },
       );
 
+      //  call lambda function
+      const lambdaPayload = {
+        case: 'end_mission',
+        mission: {
+          id: mission_id,
+        },
+        skipster: {
+          name: skipster_nickname,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
+
       return { message: 'mission ended' };
     } catch (e) {
       throw new NotFoundException('Error updating order status');
@@ -414,7 +438,7 @@ export class OriginsService {
   // end mission-3
   async backToHome(payload: UpdateMissionStatus) {
     try {
-      const { mission_id } = payload;
+      const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
 
       const endedMission = await this.originsData.updateMissionById(
@@ -433,6 +457,18 @@ export class OriginsService {
           current_skip_id: null,
         },
       );
+
+      //  call lambda function
+      const lambdaPayload = {
+        case: 'end_mission',
+        mission: {
+          id: mission_id,
+        },
+        skipster: {
+          name: skipster_nickname,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
 
       return { message: 'mission ended' };
     } catch (e) {
@@ -515,45 +551,45 @@ export class OriginsService {
     try {
       // TODO: update mission on our DB
       const { mission_id, skipster_nickname } = payload;
-      // const todayDate = new Date();
-      // let skipster_id = null;
-      // const skipster = await this.originsData.getSkipster({
-      //   nickname: skipster_nickname,
-      // });
+      const todayDate = new Date();
+      let skipster_id = null;
+      const skipster = await this.originsData.getSkipster({
+        nickname: skipster_nickname,
+      });
 
-      // if (!skipster || skipster === null) {
-      //   // creates new skipster
-      //   const newSkipster = await this.originsData.createSkipster({
-      //     nickname: skipster_nickname,
-      //     status: 'busy',
-      //     lastSeen: todayDate,
-      //     // fake experience
-      //     experience: 10,
-      //     // fake level
-      //     level: 1,
-      //   });
-      //   skipster_id = newSkipster._id;
-      // } else {
-      //   skipster_id = skipster._id;
-      // }
-      // // pick/accept mission if mission is not picked/accepted
-      // const missionPicked = await this.originsData.updateMission(
-      //   {
-      //     _id: mission_id,
-      //     skipster_id: null,
-      //   },
-      //   {
-      //     skipster_id: skipster_id,
-      //     startTime: todayDate,
-      //   },
-      // );
+      if (!skipster || skipster === null) {
+        // creates new skipster
+        const newSkipster = await this.originsData.createSkipster({
+          nickname: skipster_nickname,
+          status: 'busy',
+          lastSeen: todayDate,
+          // fake experience
+          experience: 10,
+          // fake level
+          level: 1,
+        });
+        skipster_id = newSkipster._id;
+      } else {
+        skipster_id = skipster._id;
+      }
+      // pick/accept mission if mission is not picked/accepted
+      const missionPicked = await this.originsData.updateMission(
+        {
+          _id: mission_id,
+          skipster_id: null,
+        },
+        {
+          skipster_id: skipster_id,
+          startTime: todayDate,
+        },
+      );
 
-      // if (!missionPicked) {
-      //   // throw error if mission is picked/accepted by someone else
-      //   throw new NotFoundException('Mission already picked');
-      // }
-      // const skip = await this.originsData.getSkipById(missionPicked.skip_id);
-      // TODO: call lambda function
+      if (!missionPicked) {
+        // throw error if mission is picked/accepted by someone else
+        throw new NotFoundException('Mission already picked');
+      }
+      await this.originsData.getSkipById(missionPicked.skip_id);
+      //  call lambda function
       const lambdaPayload = {
         case: 'accept_mission',
         skipster: {
@@ -565,10 +601,6 @@ export class OriginsService {
       };
       this.lambdaService.invokeLambda(lambdaPayload);
       return { message: 'mission accepted' };
-      // return {
-      //   mission: missionPicked,
-      //   order_id: skip.order_info.order_id,
-      // };
     } catch (error) {
       throw new NotFoundException('Error accepting the mission');
     }

@@ -161,7 +161,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/api2-nest/prod/1655414209734-2022-06-16T21:16:49.734Z/api2-nest.zip"
+          "S3Key": "serverless/api2-nest/prod/1655752859105-2022-06-20T19:20:59.105Z/api2-nest.zip"
         },
         "Handler": "dist/serverless.handler",
         "Runtime": "nodejs12.x",
@@ -179,14 +179,14 @@
         "MainLogGroup"
       ]
     },
-    "MainLambdaVersiond2NcUFsNGsVPVDlIJ2DnhvfDz2SBXgVybNgWFf6awHY": {
+    "MainLambdaVersionvM9HGPjSwfrsLMFZ6Hqg4iRxY32QH1XH2tgxC9fWrw": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "MainLambdaFunction"
         },
-        "CodeSha256": "1rxTzy5tTBNBkQz+y6fnqb9wtB80dPttbNsig24u0v4="
+        "CodeSha256": "WZukvFwDd2BPFdkWUjYgmGeA5MJzk/rxdaVfJoaMnZ0="
       }
     },
     "ApiGatewayResourceProxyVar": {
@@ -283,7 +283,7 @@
         "MainLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1655414190489": {
+    "ApiGatewayDeployment1655752838960": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": "2d5yxyfnc5",
@@ -342,7 +342,7 @@
     "MainLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "MainLambdaVersiond2NcUFsNGsVPVDlIJ2DnhvfDz2SBXgVybNgWFf6awHY"
+        "Ref": "MainLambdaVersionvM9HGPjSwfrsLMFZ6Hqg4iRxY32QH1XH2tgxC9fWrw"
       },
       "Export": {
         "Name": "sls-api2-nest-prod-MainLambdaFunctionQualifiedArn"

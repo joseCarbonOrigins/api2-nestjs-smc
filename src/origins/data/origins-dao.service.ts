@@ -31,7 +31,7 @@ export class OriginsDaoService {
     const missions = await this.missionModel
       .find(data)
       .select(
-        '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name',
+        '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
       )
       .populate({
         path: 'skip_id',

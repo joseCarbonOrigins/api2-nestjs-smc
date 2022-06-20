@@ -68,4 +68,8 @@ export class UpdateMissionStatus {
   @IsNotEmpty()
   @ApiProperty()
   readonly mission_id: string;
+
+  @IsString()
+  @ApiProperty()
+  readonly skipster_nickname?: string;
 }

@@ -160,11 +160,23 @@ export class DummyService {
         await newMission3.save();
       }
 
-      const missions = await this.missionModel.find({
-        mission_completed: false,
-        previous_mission_completed: true,
-        skipster_id: null,
-      });
+      const missions = await this.missionModel
+        .find({
+          mission_completed: false,
+          previous_mission_completed: true,
+          skipster_id: null,
+        })
+        .select(
+          '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
+        )
+        .populate({
+          path: 'skip_id',
+          select: 'skippy_id -_id',
+          populate: {
+            path: 'skippy_id',
+            select: 'name email -_id',
+          },
+        });
 
       const lambdaPayload = {
         case: 'new_mission',
