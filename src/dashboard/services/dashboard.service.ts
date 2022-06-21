@@ -163,4 +163,12 @@ export class DashboardService {
       throw new NotFoundException('Could not force finish mission');
     }
   }
+
+  async deleteMission(body: MissionQueryDto): Promise<any> {
+    try {
+      // TODO: DELETE MISSION ONLY IF THIS MISSION IS DELETED
+    } catch (error) {
+      throw new NotFoundException('Could not delete mission');
+    }
+  }
 }

@@ -177,7 +177,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/api2-nest/prod/1655752859105-2022-06-20T19:20:59.105Z/api2-nest.zip"
+                "S3Key": "serverless/api2-nest/prod/1655832645125-2022-06-21T17:30:45.125Z/api2-nest.zip"
               },
               "Handler": "dist/serverless.handler",
               "Runtime": "nodejs12.x",
@@ -195,14 +195,14 @@
               "MainLogGroup"
             ]
           },
-          "MainLambdaVersionvM9HGPjSwfrsLMFZ6Hqg4iRxY32QH1XH2tgxC9fWrw": {
+          "MainLambdaVersionzwjjdI1aGIhvG00dXxIzB5zefHmNKJyKTmB2o7Jt3cI": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "MainLambdaFunction"
               },
-              "CodeSha256": "WZukvFwDd2BPFdkWUjYgmGeA5MJzk/rxdaVfJoaMnZ0="
+              "CodeSha256": "Yrn25TfsgT3zFcMbBSzGrJO2sMRrMx4u8+WkWZqlU3Y="
             }
           },
           "ApiGatewayResourceProxyVar": {
@@ -299,7 +299,7 @@
               "MainLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1655752838960": {
+          "ApiGatewayDeployment1655832623248": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": "2d5yxyfnc5",
@@ -358,7 +358,7 @@
           "MainLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MainLambdaVersionvM9HGPjSwfrsLMFZ6Hqg4iRxY32QH1XH2tgxC9fWrw"
+              "Ref": "MainLambdaVersionzwjjdI1aGIhvG00dXxIzB5zefHmNKJyKTmB2o7Jt3cI"
             },
             "Export": {
               "Name": "sls-api2-nest-prod-MainLambdaFunctionQualifiedArn"
@@ -510,7 +510,7 @@
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "MainLambdaVersionvM9HGPjSwfrsLMFZ6Hqg4iRxY32QH1XH2tgxC9fWrw"
+        "versionLogicalId": "MainLambdaVersionzwjjdI1aGIhvG00dXxIzB5zefHmNKJyKTmB2o7Jt3cI"
       }
     },
     "configValidationMode": "warn",
@@ -535,7 +535,7 @@
     "artifact": "/Users/josemendoza/Documents/Carbon Origins/SMC/api2-nest/.serverless/api2-nest.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/api2-nest/prod/1655752859105-2022-06-20T19:20:59.105Z",
+    "artifactDirectoryName": "serverless/api2-nest/prod/1655832645125-2022-06-21T17:30:45.125Z",
     "artifact": "api2-nest.zip"
   }
 }

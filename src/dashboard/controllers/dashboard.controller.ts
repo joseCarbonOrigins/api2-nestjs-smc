@@ -29,4 +29,10 @@ export class DashboardController {
   forceFinishMissions(@Body() body: MissionQueryDto) {
     return this.dashboardService.forceFinishMissions(body);
   }
+  @ApiOperation({ summary: `Delete mission` })
+  @Post('missions/delete')
+  @Header('Access-Control-Allow-Origin', '*')
+  deleteMission(@Body() body: MissionQueryDto) {
+    return this.dashboardService.deleteMission(body);
+  }
 }
