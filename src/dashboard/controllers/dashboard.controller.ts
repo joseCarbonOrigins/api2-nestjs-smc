@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Header, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Param,
+  Post,
+  Delete,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { DashboardService } from '../services/dashboard.service';
 // dto
@@ -29,8 +37,9 @@ export class DashboardController {
   forceFinishMissions(@Body() body: MissionQueryDto) {
     return this.dashboardService.forceFinishMissions(body);
   }
+
   @ApiOperation({ summary: `Delete mission` })
-  @Post('missions/delete')
+  @Delete('missions/delete')
   @Header('Access-Control-Allow-Origin', '*')
   deleteMission(@Body() body: MissionQueryDto) {
     return this.dashboardService.deleteMission(body);
