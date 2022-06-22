@@ -39,9 +39,9 @@ export class DashboardController {
   }
 
   @ApiOperation({ summary: `Delete mission` })
-  @Delete('missions/delete')
+  @Delete('missions/delete/:mission')
   @Header('Access-Control-Allow-Origin', '*')
-  deleteMission(@Body() body: MissionQueryDto) {
-    return this.dashboardService.deleteMission(body);
+  deleteMission(@Param('mission') missionId: string) {
+    return this.dashboardService.deleteMission(missionId);
   }
 }

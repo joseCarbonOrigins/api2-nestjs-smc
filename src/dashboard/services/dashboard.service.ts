@@ -164,13 +164,13 @@ export class DashboardService {
     }
   }
 
-  async deleteMission(body: MissionQueryDto): Promise<any> {
+  async deleteMission(mission_id: string): Promise<any> {
     try {
-      const { mission_id } = body;
       await this.missionModel.findOneAndDelete({
         _id: mission_id,
         mission_completed: true,
       });
+      return { message: 'mission deleted' };
     } catch (error) {
       throw new NotFoundException('Could not delete mission');
     }
