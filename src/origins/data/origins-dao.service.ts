@@ -108,7 +108,13 @@ export class OriginsDaoService {
   }
 
   async getSkipById(skipId: string): Promise<any> {
-    const skip = await this.skipModel.findById(skipId);
+    const skip = await this.skipModel
+      .findById(skipId)
+      .select('order_info skippy_id mock startTime')
+      .populate({
+        path: 'skippy_id',
+        select: '-_id email',
+      });
     return skip;
   }
 

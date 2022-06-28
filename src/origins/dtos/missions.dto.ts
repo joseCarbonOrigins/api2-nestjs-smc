@@ -53,9 +53,8 @@ export class UpdateMissionOrderStatusDto {
   @ApiProperty()
   readonly skippyname: string;
 
-  @IsNotEmpty()
   @ApiProperty()
-  readonly location: LocationDto;
+  readonly location?: LocationDto;
 
   @IsString()
   @IsNotEmpty()
