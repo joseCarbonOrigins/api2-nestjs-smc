@@ -91,7 +91,7 @@ export class OriginsController {
       'When skippy arrieved Twin Ignition (home). This endpoint will end mission-3',
   })
   @Patch('missions/back-to-home')
-  @Header('Access- Control-Allow-Origin', '*')
+  @Header('Access-Control-Allow-Origin', '*')
   backToHome(@Body() payload: UpdateMissionStatus) {
     return this.originsService.backToHome(payload);
   }
