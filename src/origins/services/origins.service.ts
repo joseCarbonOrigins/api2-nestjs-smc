@@ -297,14 +297,14 @@ export class OriginsService {
       );
 
       // update order status
-      if (!endedMission.mock) {
-        const skip = await this.originsData.getSkipById(endedMission.skip_id);
-        await this.oldUpdateOrderStatus(
-          skip.skippy_id.email,
-          skip.order_info.order_id,
-          'ARRIVED',
-        );
-      }
+      // if (!endedMission.mock) {
+      //   const skip = await this.originsData.getSkipById(endedMission.skip_id);
+      //   await this.oldUpdateOrderStatus(
+      //     skip.skippy_id.email,
+      //     skip.order_info.order_id,
+      //     'ARRIVED',
+      //   );
+      // }
 
       //  call lambda function
       const lambdaPayload = {

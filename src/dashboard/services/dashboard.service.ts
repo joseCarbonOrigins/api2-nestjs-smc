@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
@@ -95,7 +99,7 @@ export class DashboardService {
       return fullResponse;
     } catch (error) {
       console.log(error);
-      return { error: 'error' };
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 
@@ -126,7 +130,7 @@ export class DashboardService {
 
       return response;
     } catch (e) {
-      throw new NotFoundException('Could not find missions');
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 
@@ -140,6 +144,11 @@ export class DashboardService {
           mission_completed: true,
         },
       );
+
+      if (!finishedMission) {
+        throw new NotFoundException('Could not find mission');
+      }
+
       const previousMission = await this.missionModel.findOneAndUpdate(
         {
           previous_mission_id: finishedMission._id,
@@ -160,19 +169,24 @@ export class DashboardService {
 
       return { message: 'mission finished' };
     } catch (e) {
-      throw new NotFoundException('Could not force finish mission');
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 
   async deleteMission(mission_id: string): Promise<any> {
     try {
-      await this.missionModel.findOneAndDelete({
+      const missionDeleted = await this.missionModel.findOneAndDelete({
         _id: mission_id,
         mission_completed: true,
       });
+
+      if (!missionDeleted) {
+        throw new NotFoundException('Mission has to be finished before.');
+      }
+
       return { message: 'mission deleted' };
     } catch (error) {
-      throw new NotFoundException('Could not delete mission');
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 }
