@@ -214,16 +214,15 @@ export class OriginsService {
       const skip = await this.originsData.getSkipById(missionPicked.skip_id);
 
       // update order status based on mission picked up
-      if (missionPicked.name === 'Driving to customer') {
+      if (missionPicked.mission_name === 'Driving to customer') {
         if (!missionPicked.mock) {
-          await this.oldUpdateOrderStatus(
+          await this.dl.updateOrderStatus(
             skip.skippy_id.email,
             skip.order_info.order_id,
             'ENROUTE',
           );
         }
       }
-
       return {
         mission: missionPicked,
         order_id: skip.order_info.order_id,
@@ -297,14 +296,14 @@ export class OriginsService {
       );
 
       // update order status
-      // if (!endedMission.mock) {
-      //   const skip = await this.originsData.getSkipById(endedMission.skip_id);
-      //   await this.oldUpdateOrderStatus(
-      //     skip.skippy_id.email,
-      //     skip.order_info.order_id,
-      //     'ARRIVED',
-      //   );
-      // }
+      if (!endedMission.mock) {
+        const skip = await this.originsData.getSkipById(endedMission.skip_id);
+        await this.dl.updateOrderStatus(
+          skip.skippy_id.email,
+          skip.order_info.order_id,
+          'ARRIVED',
+        );
+      }
 
       //  call lambda function
       const lambdaPayload = {

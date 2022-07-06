@@ -9,14 +9,18 @@ import { DeliverLogicService } from '../../external/services/deliver-logic.servi
 // schemas
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
+import { Skip } from '../../database/schemas/skip.schema';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
+// external services
 
 @Injectable()
 export class DashboardService {
   constructor(
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
+    @InjectModel(Skip.name) private skipModel: Model<Skip>,
+
     private dl: DeliverLogicService,
   ) {}
 
@@ -157,7 +161,7 @@ export class DashboardService {
       );
 
       if (previousMission === null) {
-        await this.skippyModel.findOneAndUpdate(
+        const skippyFound = await this.skippyModel.findOneAndUpdate(
           {
             current_skip_id: finishedMission.skip_id,
           },
@@ -165,6 +169,14 @@ export class DashboardService {
             current_skip_id: null,
           },
         );
+        if (!finishedMission.mock) {
+          const skip = await this.skipModel.findById(finishedMission.skip_id);
+          await this.dl.updateOrderStatus(
+            skippyFound.email,
+            skip.order_info.order_id,
+            'DELIVERED',
+          );
+        }
       }
 
       return { message: 'mission finished' };
