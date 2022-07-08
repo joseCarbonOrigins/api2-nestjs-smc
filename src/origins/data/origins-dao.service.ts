@@ -71,10 +71,16 @@ export class OriginsDaoService {
     missionId: string,
     data: MissionUpdate,
   ): Promise<any> {
-    const missionUpdated = await this.missionModel.findByIdAndUpdate(
-      missionId,
-      data,
-    );
+    const missionUpdated = await this.missionModel
+      .findByIdAndUpdate(missionId, data)
+      .populate({
+        path: 'skip_id',
+        select: 'skippy_id -_id',
+        populate: {
+          path: 'skippy_id',
+          select: 'name email -_id',
+        },
+      });
     return missionUpdated;
   }
 
@@ -82,7 +88,16 @@ export class OriginsDaoService {
     findParams: MissionsQuery,
     data: MissionUpdate,
   ): Promise<any> {
-    const mission = await this.missionModel.findOneAndUpdate(findParams, data);
+    const mission = await this.missionModel
+      .findOneAndUpdate(findParams, data)
+      .populate({
+        path: 'skip_id',
+        select: 'skippy_id -_id',
+        populate: {
+          path: 'skippy_id',
+          select: 'name email -_id',
+        },
+      });
     return mission;
   }
 

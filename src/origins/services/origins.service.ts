@@ -12,6 +12,7 @@ import {
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
 import { TwilioService } from '../../external/services/twilio.service';
 import { OriginsDaoService } from '../data/origins-dao.service';
+import { LockingMechanismService } from 'src/external/services/locking-mechanism.service';
 
 @Injectable()
 export class OriginsService {
@@ -20,6 +21,7 @@ export class OriginsService {
     private twilio: TwilioService,
     private dl: DeliverLogicService,
     private lambdaService: LambdaService,
+    private lockingService: LockingMechanismService,
   ) {}
 
   async getAvailableMissions(): Promise<any> {
@@ -213,8 +215,28 @@ export class OriginsService {
       }
       const skip = await this.originsData.getSkipById(missionPicked.skip_id);
 
-      // update order status based on mission picked up
+      // STARTING MISSION 1
+      if (missionPicked.mission_name === 'Driving to merchant') {
+        // send locking mechanism payload to skippy
+        await this.lockingService.sendLockingPayload(
+          missionPicked.skip_id.skippy_id.email,
+          'driving_merchant',
+          1234,
+          `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
+        );
+      }
+
+      // STARTING MISSION 2
       if (missionPicked.mission_name === 'Driving to customer') {
+        // send locking mechanism payload to skippy
+        await this.lockingService.sendLockingPayload(
+          missionPicked.skip_id.skippy_id.email,
+          'driving_customer',
+          1234,
+          `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
+        );
+
+        // update order status based on mission picked up
         if (!missionPicked.mock) {
           await this.dl.updateOrderStatus(
             skip.skippy_id.email,
@@ -297,12 +319,12 @@ export class OriginsService {
 
       // update order status
       if (!endedMission.mock) {
-        const skip = await this.originsData.getSkipById(endedMission.skip_id);
-        await this.dl.updateOrderStatus(
-          skip.skippy_id.email,
-          skip.order_info.order_id,
-          'ARRIVED',
-        );
+        // const skip = await this.originsData.getSkipById(endedMission.skip_id);
+        // await this.dl.updateOrderStatus(
+        //   skip.skippy_id.email,
+        //   skip.order_info.order_id,
+        //   'ARRIVED',
+        // );
       }
 
       //  call lambda function
@@ -342,6 +364,16 @@ export class OriginsService {
           previous_mission_id: endedMission._id,
         },
         { previous_mission_completed: true },
+      );
+
+      const skip = await this.originsData.getSkipById(endedMission.skip_id);
+
+      // send locking mechanism payload to skippy
+      await this.lockingService.sendLockingPayload(
+        endedMission.skip_id.skippy_id.email,
+        'arrived_customer',
+        1234,
+        `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
       );
 
       // UPDATE ORDER STATUS
@@ -450,10 +482,20 @@ export class OriginsService {
             },
           );
 
-          this.twilio.makeACall(
-            restaurantPhone,
-            'Hello. Skippy. is at your restaurant',
+          // send locking mechanism payload to skippy
+          await this.lockingService.sendLockingPayload(
+            skippyname,
+            'arrived_merchant',
+            1234,
+            `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
           );
+
+          if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
+            this.twilio.makeACall(
+              restaurantPhone,
+              'Hello. Skippy. is at your restaurant',
+            );
+          }
 
           this.twilio.sendSMS(
             customerPhone,
@@ -631,6 +673,8 @@ export class OriginsService {
         },
       };
       this.lambdaService.invokeLambda(lambdaPayload);
+
+      // TODO: send the skip info
       return { message: 'mission accepted' };
     } catch (error) {
       throw new NotFoundException('Error accepting the mission');
@@ -656,7 +700,6 @@ export class OriginsService {
       throw new NotFoundException('Error declining the mission');
     }
   }
-
   // async test(): Promise<any> {
   //   try {
   //     const missions = await this.originsData.getMissions({
