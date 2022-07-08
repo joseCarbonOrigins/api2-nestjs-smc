@@ -13,8 +13,8 @@ export class LockingMechanismService {
     customerName: string,
   ) {
     const obj = {
-      // skippy: skippyEmail.split('@')[0],
-      skippy: 'sol',
+      skippy: skippyEmail.split('@')[0],
+      // skippy: 'sol',
       skippy_status: skippyStatus,
       password,
       customer: customerName,
