@@ -34,7 +34,6 @@
     "axios": "^0.27.2",
     "class-validator": "^0.13.2",
     "joi": "^17.6.0",
-    "mfa-serverless-plugin": "^0.0.5",
     "mongoose": "^6.3.4",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

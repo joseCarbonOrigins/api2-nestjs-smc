@@ -13,14 +13,17 @@ export class LockingMechanismService {
     customerName: string,
   ) {
     const obj = {
-      skippy: skippyEmail.split('@')[0],
+      // skippy: skippyEmail.split('@')[0],
+      skippy: 'sol',
       skippy_status: skippyStatus,
       password,
       customer: customerName,
     };
 
     await firstValueFrom(
-      this.http.post('http://54.172.111.235:3000/skippy/locking', obj),
+      this.http.post('http://54.172.111.235:3000/skippy/locking', obj, {
+        headers: { 'Content-Type': 'application/json' },
+      }),
     );
   }
 }

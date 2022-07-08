@@ -247,9 +247,9 @@ export class OriginsService {
       }
       return {
         mission: missionPicked,
-        order_id: skip.order_info.order_id,
       };
     } catch (error) {
+      console.log('PICK MISSION ERROR', error);
       throw new NotFoundException('Mission not picked');
     }
   }
@@ -317,16 +317,6 @@ export class OriginsService {
         { previous_mission_completed: true },
       );
 
-      // update order status
-      if (!endedMission.mock) {
-        // const skip = await this.originsData.getSkipById(endedMission.skip_id);
-        // await this.dl.updateOrderStatus(
-        //   skip.skippy_id.email,
-        //   skip.order_info.order_id,
-        //   'ARRIVED',
-        // );
-      }
-
       //  call lambda function
       const lambdaPayload = {
         case: 'end_mission',
@@ -339,7 +329,7 @@ export class OriginsService {
       };
       this.lambdaService.invokeLambda(lambdaPayload);
 
-      return { message: 'mission ended' };
+      return { message: 'mission1 ended' };
     } catch (e) {
       throw new NotFoundException('Error updating order status');
     }
@@ -366,22 +356,19 @@ export class OriginsService {
         { previous_mission_completed: true },
       );
 
-      const skip = await this.originsData.getSkipById(endedMission.skip_id);
-
       // send locking mechanism payload to skippy
       await this.lockingService.sendLockingPayload(
         endedMission.skip_id.skippy_id.email,
         'arrived_customer',
         1234,
-        `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
+        `${endedMission.skip_id.order_info.customer.firstName} ${endedMission.skip_id.order_info.customer.lastName}`,
       );
 
       // UPDATE ORDER STATUS
       if (!endedMission.mock) {
-        const skip = await this.originsData.getSkipById(endedMission.skip_id);
         await this.oldUpdateOrderStatus(
-          skip.skippy_id.email,
-          skip.order_info.order_id,
+          endedMission.skip_id.skippy_id.email,
+          endedMission.skip_id.order_info.order_id,
           'DELIVERED',
         );
       }
@@ -398,8 +385,9 @@ export class OriginsService {
       };
       this.lambdaService.invokeLambda(lambdaPayload);
 
-      return { message: 'mission ended' };
+      return { message: 'mission2 ended' };
     } catch (e) {
+      console.log('END MISSION 2 ERROR ', e);
       throw new NotFoundException('Error updating order status');
     }
   }
@@ -420,7 +408,7 @@ export class OriginsService {
 
       await this.originsData.updateSkippy(
         {
-          current_skip_id: endedMission.skip_id,
+          current_skip_id: endedMission.skip_id._id,
         },
         {
           current_skip_id: null,
@@ -439,7 +427,7 @@ export class OriginsService {
       };
       this.lambdaService.invokeLambda(lambdaPayload);
 
-      return { message: 'mission ended' };
+      return { message: 'mission3 ended' };
     } catch (e) {
       throw new NotFoundException('Error updating order status');
     }
@@ -612,6 +600,7 @@ export class OriginsService {
       const { mission_id } = payload;
       await this.originsData.updateMissionById(mission_id, {
         skipster_id: null,
+        mission_completed: false,
       });
 
       return { message: 'mission unassigned' };
@@ -622,7 +611,6 @@ export class OriginsService {
 
   async acceptMission(payload: AcceptDeclineMissionDto): Promise<any> {
     try {
-      // TODO: update mission on our DB
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
       let skipster_id = null;
@@ -674,8 +662,7 @@ export class OriginsService {
       };
       this.lambdaService.invokeLambda(lambdaPayload);
 
-      // TODO: send the skip info
-      return { message: 'mission accepted' };
+      return { message: 'mission accepted', mission: missionPicked };
     } catch (error) {
       throw new NotFoundException('Error accepting the mission');
     }
@@ -683,7 +670,6 @@ export class OriginsService {
 
   async declineMission(payload: AcceptDeclineMissionDto): Promise<any> {
     try {
-      // TODO: call lambda function, send the mission for someone else
       const { mission_id, skipster_nickname } = payload;
       const lambdaPayload = {
         case: 'decline_mission',

@@ -142,12 +142,14 @@ export class DashboardService {
     try {
       const { mission_id } = body;
 
-      const finishedMission = await this.missionModel.findByIdAndUpdate(
-        mission_id,
-        {
+      const finishedMission = await this.missionModel
+        .findByIdAndUpdate(mission_id, {
           mission_completed: true,
-        },
-      );
+        })
+        .populate({
+          path: 'skip_id',
+          select: 'skippy_id order_info',
+        });
 
       if (!finishedMission) {
         throw new NotFoundException('Could not find mission');
@@ -163,7 +165,7 @@ export class DashboardService {
       if (previousMission === null) {
         const skippyFound = await this.skippyModel.findOneAndUpdate(
           {
-            current_skip_id: finishedMission.skip_id,
+            current_skip_id: finishedMission.skip_id._id,
           },
           {
             current_skip_id: null,
@@ -198,6 +200,7 @@ export class DashboardService {
 
       return { message: 'mission deleted' };
     } catch (error) {
+      console.log('ERROR DELETING MISSION ', error);
       throw new InternalServerErrorException('Internal server error');
     }
   }

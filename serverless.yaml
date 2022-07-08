@@ -2,7 +2,6 @@ service: api2-nest
 
 plugins:
   - serverless-offline
-  - mfa-serverless-plugin
 
 provider:
   name: aws

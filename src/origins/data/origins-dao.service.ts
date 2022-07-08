@@ -35,7 +35,7 @@ export class OriginsDaoService {
       )
       .populate({
         path: 'skip_id',
-        select: 'skippy_id -_id',
+        select: 'skippy_id -_id order_info',
         populate: {
           path: 'skippy_id',
           select: 'name email -_id',
@@ -75,10 +75,10 @@ export class OriginsDaoService {
       .findByIdAndUpdate(missionId, data)
       .populate({
         path: 'skip_id',
-        select: 'skippy_id -_id',
+        select: 'skippy_id order_info',
         populate: {
           path: 'skippy_id',
-          select: 'name email -_id',
+          select: 'name email',
         },
       });
     return missionUpdated;
@@ -92,10 +92,10 @@ export class OriginsDaoService {
       .findOneAndUpdate(findParams, data)
       .populate({
         path: 'skip_id',
-        select: 'skippy_id -_id',
+        select: 'skippy_id oder_info',
         populate: {
           path: 'skippy_id',
-          select: 'name email -_id',
+          select: 'name email',
         },
       });
     return mission;
@@ -128,7 +128,7 @@ export class OriginsDaoService {
       .select('order_info skippy_id mock startTime')
       .populate({
         path: 'skippy_id',
-        select: '-_id email',
+        select: 'email',
       });
     return skip;
   }
