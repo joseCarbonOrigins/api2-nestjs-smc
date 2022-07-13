@@ -501,9 +501,9 @@ export class OriginsService {
           );
 
           // starts 2nd mission
-          await this.originsData.updateMissionById(mission_id, {
-            startTime: todayDate,
-          });
+          // await this.originsData.updateMissionById(mission_id, {
+          //   startTime: todayDate,
+          // });
 
           this.twilio.sendSMS(
             customerPhone,

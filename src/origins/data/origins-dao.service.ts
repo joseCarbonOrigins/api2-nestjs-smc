@@ -31,14 +31,14 @@ export class OriginsDaoService {
     const missions = await this.missionModel
       .find(data)
       .select(
-        '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
+        'mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock skip_id',
       )
       .populate({
         path: 'skip_id',
-        select: 'skippy_id -_id order_info',
+        select: 'skippy_id order_info',
         populate: {
           path: 'skippy_id',
-          select: 'name email -_id',
+          select: 'name email',
         },
       });
     return missions;
@@ -92,7 +92,7 @@ export class OriginsDaoService {
       .findOneAndUpdate(findParams, data)
       .populate({
         path: 'skip_id',
-        select: 'skippy_id oder_info',
+        select: 'skippy_id order_info',
         populate: {
           path: 'skippy_id',
           select: 'name email',
