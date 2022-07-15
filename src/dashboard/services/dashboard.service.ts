@@ -5,14 +5,32 @@ import { DeliverLogicService } from '../../external/services/deliver-logic.servi
 // schemas
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
+import { Skipster } from 'src/database/schemas/skipster.schema';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
+import { SkipstersQueryDto } from '../dto/skipsters.dto';
+
+const monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 @Injectable()
 export class DashboardService {
   constructor(
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
+    @InjectModel(Skipster.name) private skipsterModel: Model<Skipster>,
     private dl: DeliverLogicService,
   ) {}
 
@@ -126,7 +144,7 @@ export class DashboardService {
 
       return response;
     } catch (e) {
-      throw new NotFoundException('Could not find missions');
+      throw new NotFoundException('getMissions - Could not find missions');
     }
   }
 
@@ -170,5 +188,158 @@ export class DashboardService {
     } catch (error) {
       throw new NotFoundException('Could not delete mission');
     }
+  }
+
+  /* Getting missions log for generate reports1 */
+  async getMissionsLog(): Promise<any> {
+    try {
+      const skippies = await this.skippyModel
+        .find({})
+        .select('_id name missions')
+        .sort({ _id: 'desc' })
+        .populate({
+          path: 'missions',
+          select: '_id mock mission_completed',
+        });
+      let realMissions = 0;
+      let mockMissions = 0;
+      const answerSkippies = skippies.map((skippy) => {
+        realMissions = 0;
+        mockMissions = 0;
+        skippy.missions.forEach((mission) => {
+          if ((mission as any).mission_completed) {
+            if ((mission as any).mock === false) {
+              realMissions += 1;
+            } else {
+              mockMissions += 1;
+            }
+          }
+        });
+        return {
+          skippyName: skippy.name,
+          realMissions: realMissions,
+          mockMissions: mockMissions,
+        };
+      });
+      const skipsters = await this.skipsterModel
+        .find({})
+        .select('_id nickname missions')
+        .sort({ _id: 'desc' })
+        .populate({
+          path: 'missions',
+          select: '_id mock mission_completed',
+        });
+      const answerSkipsters = skipsters.map((skipster) => {
+        realMissions = 0;
+        mockMissions = 0;
+        skipster.missions.forEach((mission) => {
+          if ((mission as any).mission_completed) {
+            if ((mission as any).mock === false) {
+              realMissions += 1;
+            } else {
+              mockMissions += 1;
+            }
+          }
+        });
+        return {
+          skipsterName: skipster.nickname,
+          realMissions: realMissions,
+          mockMissions: mockMissions,
+        };
+      });
+      const response = {
+        data: [answerSkippies, answerSkipsters],
+      };
+
+      return response;
+    } catch (e) {
+      console.log('getMissionsLog ', e);
+      throw new NotFoundException(
+        'getMissionsLog - Could not get any missions',
+      );
+    }
+  }
+
+  /* Skipsters time sheet reports2 */
+  async getSkipstersTimeSheet(query: SkipstersQueryDto): Promise<any> {
+    try {
+      let { initialDate, endingDate } = query;
+      //WE NEED TO ADD 1 DAY TO THE ENDING DATE, BECAUSE IS NOT INCLUSIVE
+      if (endingDate !== undefined) {
+        endingDate = new Date(endingDate);
+        endingDate.setDate(endingDate.getDate() + 1);
+      }
+      switch (true) {
+        case initialDate === undefined && endingDate === undefined:
+          initialDate = new Date('2022-01-01T00:00:00');
+          endingDate = new Date(Date.now());
+          break;
+        case initialDate === undefined:
+          initialDate = new Date('2022-01-01T00:00:00');
+          break;
+        case endingDate === undefined:
+          endingDate = new Date(Date.now());
+      }
+      const skipsters = await this.skipsterModel
+        .find({})
+        .select('_id nickname missions')
+        .sort({ _id: 'desc' })
+        .populate({
+          path: 'missions',
+          select: 'driving_time mission_coins mock startTime',
+          match: { startTime: { $gte: initialDate, $lte: endingDate } },
+        });
+      let coinsPayout = 0;
+      let drivingSeconds = 0;
+      let missionsAmount = 0;
+      const earningsMap = new Map();
+      const answer = skipsters.map((skipster) => {
+        earningsMap.clear();
+        coinsPayout = 0;
+        drivingSeconds = 0;
+        missionsAmount = 0;
+        skipster.missions.forEach((mission) => {
+          //REMOVE THIS IF STATEMENT IF YOU WANT TO CONSIDER MOCK MISSIONS
+          if ((mission as any).mock === false) {
+            coinsPayout += (mission as any).mission_coins;
+            drivingSeconds += (mission as any).driving_time;
+            missionsAmount += 1;
+            earningsMap.set(
+              monthNames[(mission as any).startTime.getMonth()],
+              earningsMap.get((mission as any).startTime.getMonth()) +
+                (mission as any).mission_coins ||
+                (mission as any).mission_coins,
+            );
+          }
+        });
+        return {
+          nickname: skipster.nickname,
+          id: skipster._id,
+          drivingSeconds: drivingSeconds,
+          missionsAmount: missionsAmount,
+          coinsPayout: coinsPayout,
+          earnings: this.strMapToObj(earningsMap),
+        };
+      });
+      const response = {
+        data: answer,
+      };
+
+      return response;
+    } catch (e) {
+      throw new NotFoundException(
+        "getSkipstersTimeSheet - Couldn't get skipsters time sheet",
+      );
+    }
+  }
+
+  strMapToObj(strMap: Map<string, number>): Promise<any> {
+    const obj = Object.create(null);
+    for (const [k, v] of strMap) {
+      // We don’t escape the key '__proto__'
+      // which can cause problems on older engines
+      obj[k] = v;
+    }
+    return obj;
   }
 }
