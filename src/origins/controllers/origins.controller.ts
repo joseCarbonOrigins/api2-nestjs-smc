@@ -67,6 +67,7 @@ export class OriginsController {
     );
   }
 
+  // end mission1
   @ApiOperation({
     summary: 'When food is placed. This endpoint will end mission-1',
   })
@@ -76,6 +77,7 @@ export class OriginsController {
     return this.originsService.foodPlaced(payload);
   }
 
+  // end mission2
   @ApiOperation({
     summary:
       'When food is delivered to customer. This endpoint will end mission-2',
@@ -86,12 +88,13 @@ export class OriginsController {
     return this.originsService.foodDelivered(payload);
   }
 
+  // end mission3
   @ApiOperation({
     summary:
       'When skippy arrieved Twin Ignition (home). This endpoint will end mission-3',
   })
   @Patch('missions/back-to-home')
-  @Header('Access- Control-Allow-Origin', '*')
+  @Header('Access-Control-Allow-Origin', '*')
   backToHome(@Body() payload: UpdateMissionStatus) {
     return this.originsService.backToHome(payload);
   }

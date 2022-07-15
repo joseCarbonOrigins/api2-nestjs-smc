@@ -134,7 +134,7 @@ export class DummyService {
           },
           ending_point: {
             type: 'Point',
-            coordinates: [45.0004353, -93.2705556],
+            coordinates: [45.000674262505754, -93.26999691463327],
           },
           start_address_name: customerInfo.address,
           ending_address_name: '1317 County Rd 23, Minneapolis, MN 55413, USA',

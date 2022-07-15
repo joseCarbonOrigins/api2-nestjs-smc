@@ -31,14 +31,14 @@ export class OriginsDaoService {
     const missions = await this.missionModel
       .find(data)
       .select(
-        '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
+        'mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock skip_id',
       )
       .populate({
         path: 'skip_id',
-        select: 'skippy_id -_id',
+        select: 'skippy_id order_info',
         populate: {
           path: 'skippy_id',
-          select: 'name email -_id',
+          select: 'name email',
         },
       });
     return missions;
@@ -71,10 +71,16 @@ export class OriginsDaoService {
     missionId: string,
     data: MissionUpdate,
   ): Promise<any> {
-    const missionUpdated = await this.missionModel.findByIdAndUpdate(
-      missionId,
-      data,
-    );
+    const missionUpdated = await this.missionModel
+      .findByIdAndUpdate(missionId, data)
+      .populate({
+        path: 'skip_id',
+        select: 'skippy_id order_info',
+        populate: {
+          path: 'skippy_id',
+          select: 'name email',
+        },
+      });
     return missionUpdated;
   }
 
@@ -82,7 +88,16 @@ export class OriginsDaoService {
     findParams: MissionsQuery,
     data: MissionUpdate,
   ): Promise<any> {
-    const mission = await this.missionModel.findOneAndUpdate(findParams, data);
+    const mission = await this.missionModel
+      .findOneAndUpdate(findParams, data)
+      .populate({
+        path: 'skip_id',
+        select: 'skippy_id order_info',
+        populate: {
+          path: 'skippy_id',
+          select: 'name email',
+        },
+      });
     return mission;
   }
 
@@ -108,7 +123,13 @@ export class OriginsDaoService {
   }
 
   async getSkipById(skipId: string): Promise<any> {
-    const skip = await this.skipModel.findById(skipId);
+    const skip = await this.skipModel
+      .findById(skipId)
+      .select('order_info skippy_id mock startTime')
+      .populate({
+        path: 'skippy_id',
+        select: 'email',
+      });
     return skip;
   }
 

@@ -1,14 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
 // schemas
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
+
 import { Skipster } from 'src/database/schemas/skipster.schema';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
+import { Skip } from '../../database/schemas/skip.schema';
 
 const monthNames = [
   'January',
@@ -25,12 +31,15 @@ const monthNames = [
   'December',
 ];
 
+
 @Injectable()
 export class DashboardService {
   constructor(
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
     @InjectModel(Skipster.name) private skipsterModel: Model<Skipster>,
+    @InjectModel(Skip.name) private skipModel: Model<Skip>,
+
     private dl: DeliverLogicService,
   ) {}
 
@@ -113,7 +122,7 @@ export class DashboardService {
       return fullResponse;
     } catch (error) {
       console.log(error);
-      return { error: 'error' };
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 
@@ -121,20 +130,22 @@ export class DashboardService {
     try {
       const missions = await this.missionModel
         .find({})
-        .select('_id mission_name mock startTime endTime mission_completed')
+        .select(
+          '_id mission_name mock startTime endTime mission_completed skipster_id skip_id',
+        )
         .limit(10)
         .skip(skip)
         .sort({ _id: 'desc' })
         .populate({
           path: 'skipster_id',
-          select: 'nickname -_id',
+          select: 'nickname ',
         })
         .populate({
           path: 'skip_id',
-          select: 'skippy_id -_id',
+          select: 'skippy_id order_info',
           populate: {
             path: 'skippy_id',
-            select: 'name -_id',
+            select: 'name',
           },
         });
 
@@ -152,12 +163,19 @@ export class DashboardService {
     try {
       const { mission_id } = body;
 
-      const finishedMission = await this.missionModel.findByIdAndUpdate(
-        mission_id,
-        {
+      const finishedMission = await this.missionModel
+        .findByIdAndUpdate(mission_id, {
           mission_completed: true,
-        },
-      );
+        })
+        .populate({
+          path: 'skip_id',
+          select: 'skippy_id order_info',
+        });
+
+      if (!finishedMission) {
+        throw new NotFoundException('Could not find mission');
+      }
+
       const previousMission = await this.missionModel.findOneAndUpdate(
         {
           previous_mission_id: finishedMission._id,
@@ -166,27 +184,45 @@ export class DashboardService {
       );
 
       if (previousMission === null) {
-        await this.skippyModel.findOneAndUpdate(
+        const skippyFound = await this.skippyModel.findOneAndUpdate(
           {
-            current_skip_id: finishedMission.skip_id,
+            current_skip_id: finishedMission.skip_id._id,
           },
           {
             current_skip_id: null,
           },
         );
+        if (!finishedMission.mock) {
+          const skip = await this.skipModel.findById(finishedMission.skip_id);
+          await this.dl.updateOrderStatus(
+            skippyFound.email,
+            skip.order_info.order_id,
+            'DELIVERED',
+          );
+        }
       }
 
       return { message: 'mission finished' };
     } catch (e) {
-      throw new NotFoundException('Could not force finish mission');
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 
-  async deleteMission(body: MissionQueryDto): Promise<any> {
+  async deleteMission(mission_id: string): Promise<any> {
     try {
-      // TODO: DELETE MISSION ONLY IF THIS MISSION IS DELETED
+      const missionDeleted = await this.missionModel.findOneAndDelete({
+        _id: mission_id,
+        mission_completed: true,
+      });
+
+      if (!missionDeleted) {
+        throw new NotFoundException('Mission has to be finished before.');
+      }
+
+      return { message: 'mission deleted' };
     } catch (error) {
-      throw new NotFoundException('Could not delete mission');
+      console.log('ERROR DELETING MISSION ', error);
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 
