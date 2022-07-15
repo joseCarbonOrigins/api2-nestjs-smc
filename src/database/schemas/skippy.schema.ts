@@ -32,6 +32,12 @@ export class Skippy extends Document {
     }),
   )
   location: Record<string, number[]>;
+
+  @Prop({ ref: 'Skip', default: [] })
+  skips: [Types.ObjectId];
+
+  @Prop({ ref: 'Mission', default: [] })
+  missions: [Types.ObjectId];
 }
 
 export const SkippySchema = SchemaFactory.createForClass(Skippy);

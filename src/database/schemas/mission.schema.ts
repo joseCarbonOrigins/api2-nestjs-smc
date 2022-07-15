@@ -60,10 +60,10 @@ export class Mission extends Document {
   @Prop({ required: true })
   ending_address_name: string;
 
-  @Prop({ type: Types.ObjectId, ref: Skipster.name })
+  @Prop({ type: Types.ObjectId, ref: 'Skipster' })
   skipster_id: Skipster | Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: Skip.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Skip', required: true })
   skip_id: Skip | Types.ObjectId;
 
   @Prop({ required: true })
@@ -72,11 +72,14 @@ export class Mission extends Document {
   @Prop({ required: true })
   previous_mission_completed: boolean;
 
-  @Prop({ type: Types.ObjectId, ref: Mission.name })
+  @Prop({ type: Types.ObjectId, ref: 'Mission' })
   previous_mission_id: Mission | Types.ObjectId;
 
   @Prop({ default: false })
   mock: boolean;
+
+  @Prop({ default: 0 })
+  driving_time: number;
 }
 
 export const MissionSchema = SchemaFactory.createForClass(Mission);

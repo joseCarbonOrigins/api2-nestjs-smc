@@ -74,11 +74,14 @@ export class Skip extends Document {
   @Prop()
   estimatedTime: number;
 
-  @Prop({ type: Types.ObjectId, ref: Skippy.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Skippy', required: true })
   skippy_id: Skippy | Types.ObjectId;
 
   @Prop({ default: false })
   mock: boolean;
+
+  @Prop({ ref: 'Mission', default: [] })
+  missions: [Types.ObjectId];
 }
 
 export const SkipSchema = SchemaFactory.createForClass(Skip);
