@@ -111,20 +111,22 @@ export class DashboardService {
     try {
       const missions = await this.missionModel
         .find({})
-        .select('_id mission_name mock startTime endTime mission_completed')
+        .select(
+          '_id mission_name mock startTime endTime mission_completed skipster_id skip_id',
+        )
         .limit(10)
         .skip(skip)
         .sort({ _id: 'desc' })
         .populate({
           path: 'skipster_id',
-          select: 'nickname -_id',
+          select: 'nickname ',
         })
         .populate({
           path: 'skip_id',
-          select: 'skippy_id -_id',
+          select: 'skippy_id order_info',
           populate: {
             path: 'skippy_id',
-            select: 'name -_id',
+            select: 'name',
           },
         });
 

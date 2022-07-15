@@ -137,7 +137,7 @@ export class OriginsService {
             },
             ending_point: {
               type: 'Point',
-              coordinates: [45.0004353, -93.2705556],
+              coordinates: [45.000674262505754, -93.26999691463327],
             },
             start_address_name: dlOrder.dropoff.ADDRESS1,
             ending_address_name:
@@ -649,7 +649,6 @@ export class OriginsService {
         // throw error if mission is picked/accepted by someone else
         throw new NotFoundException('Mission already picked');
       }
-      await this.originsData.getSkipById(missionPicked.skip_id);
       //  call lambda function
       const lambdaPayload = {
         case: 'accept_mission',
