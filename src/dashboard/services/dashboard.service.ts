@@ -30,8 +30,6 @@ const monthNames = [
   'November',
   'December',
 ];
-
-
 @Injectable()
 export class DashboardService {
   constructor(
