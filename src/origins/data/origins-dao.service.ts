@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 // dtos
 import {
   SkippysQuery,
@@ -139,7 +139,7 @@ export class OriginsDaoService {
     return newSkip;
   }
 
-  async updateSkipById(skipId: string, data): Promise<any> {
+  async updateSkipById(skipId: string, data: any): Promise<any> {
     const skipUpdated = await this.skipModel.findByIdAndUpdate(skipId, data);
     return skipUpdated;
   }
@@ -153,5 +153,25 @@ export class OriginsDaoService {
     const newSkipster = new this.skipsterModel(data);
     await newSkipster.save();
     return newSkipster;
+  }
+
+  async pushMissionIdInsideSkipster(
+    skipsterId: string,
+    missionId: ObjectId,
+  ): Promise<any> {
+    const skipster = await this.skipsterModel.findByIdAndUpdate(skipsterId, {
+      $push: { missions: missionId },
+    });
+    return skipster;
+  }
+
+  async removeMissionIdInsideSkipster(
+    skipsterId: string,
+    missionId: ObjectId,
+  ): Promise<any> {
+    const skipster = await this.skipsterModel.findByIdAndUpdate(skipsterId, {
+      $pull: { missions: missionId },
+    });
+    return skipster;
   }
 }
