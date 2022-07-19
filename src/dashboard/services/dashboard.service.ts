@@ -217,6 +217,10 @@ export class DashboardService {
         throw new NotFoundException('Mission has to be finished before.');
       }
 
+      await this.skipsterModel.findByIdAndUpdate(missionDeleted.skipster_id, {
+        $pull: { missions: missionDeleted._id },
+      });
+
       return { message: 'mission deleted' };
     } catch (error) {
       console.log('ERROR DELETING MISSION ', error);
@@ -375,5 +379,19 @@ export class DashboardService {
       obj[k] = v;
     }
     return obj;
+  }
+
+  async testing(): Promise<any> {
+    try {
+      const skipsters = await this.skipsterModel.find({}).populate({
+        path: 'missions',
+        select: 'mission_name mission_coins',
+      });
+
+      return skipsters;
+    } catch (error) {
+      console.log('error...', error);
+      throw new InternalServerErrorException('Error testing');
+    }
   }
 }

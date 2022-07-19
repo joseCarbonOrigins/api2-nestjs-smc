@@ -179,33 +179,32 @@ export class OriginsService {
     try {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
-      let skipster_id = null;
+      // let skipster_id = null;
+      let newSkipster = null;
       const skipster = await this.originsData.getSkipster({
         nickname: skipster_nickname,
       });
 
+      // ask if skipster is new
       if (!skipster || skipster === null) {
         // creates new skipster
-        const newSkipster = await this.originsData.createSkipster({
+        const newSkipster1 = await this.originsData.createSkipster({
           nickname: skipster_nickname,
           status: 'busy',
           lastSeen: todayDate,
-          // fake experience
-          experience: 10,
-          // fake level
-          level: 1,
         });
-        skipster_id = newSkipster._id;
+        newSkipster = newSkipster1;
       } else {
-        skipster_id = skipster._id;
+        newSkipster = skipster;
       }
+
       const missionPicked = await this.originsData.updateMission(
         {
           _id: mission_id,
           skipster_id: null,
         },
         {
-          skipster_id: skipster_id,
+          skipster_id: newSkipster._id,
           startTime: todayDate,
         },
       );
@@ -213,7 +212,12 @@ export class OriginsService {
       if (!missionPicked) {
         throw new NotFoundException('Mission already picked');
       }
-      const skip = await this.originsData.getSkipById(missionPicked.skip_id);
+
+      // udpate skipster with new mission picked
+      await this.originsData.pushMissionIdInsideSkipster(
+        newSkipster._id,
+        missionPicked._id,
+      );
 
       // STARTING MISSION 1
       if (missionPicked.mission_name === 'Driving to merchant') {
@@ -222,7 +226,7 @@ export class OriginsService {
           missionPicked.skip_id.skippy_id.email,
           'driving_merchant',
           1234,
-          `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
+          `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
         );
       }
 
@@ -233,14 +237,14 @@ export class OriginsService {
           missionPicked.skip_id.skippy_id.email,
           'driving_customer',
           1234,
-          `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
+          `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
         );
 
         // update order status based on mission picked up
         if (!missionPicked.mock) {
           await this.dl.updateOrderStatus(
-            skip.skippy_id.email,
-            skip.order_info.order_id,
+            missionPicked.skip_id.skippy_id.email,
+            missionPicked.skip_id.order_info.order_id,
             'ENROUTE',
           );
         }
@@ -598,10 +602,15 @@ export class OriginsService {
   async unassignMission(payload: UpdateMissionStatus): Promise<any> {
     try {
       const { mission_id } = payload;
-      await this.originsData.updateMissionById(mission_id, {
+      const mission = await this.originsData.updateMissionById(mission_id, {
         skipster_id: null,
         mission_completed: false,
       });
+
+      await this.originsData.removeMissionIdInsideSkipster(
+        mission.skipster_id,
+        mission._id,
+      );
 
       return { message: 'mission unassigned' };
     } catch (error) {
@@ -613,14 +622,14 @@ export class OriginsService {
     try {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
-      let skipster_id = null;
+      let newSkipster = null;
       const skipster = await this.originsData.getSkipster({
         nickname: skipster_nickname,
       });
 
       if (!skipster || skipster === null) {
         // creates new skipster
-        const newSkipster = await this.originsData.createSkipster({
+        const newSkipster1 = await this.originsData.createSkipster({
           nickname: skipster_nickname,
           status: 'busy',
           lastSeen: todayDate,
@@ -629,10 +638,11 @@ export class OriginsService {
           // fake level
           level: 1,
         });
-        skipster_id = newSkipster._id;
+        newSkipster = newSkipster1;
       } else {
-        skipster_id = skipster._id;
+        newSkipster = skipster;
       }
+
       // pick/accept mission if mission is not picked/accepted
       const missionPicked = await this.originsData.updateMission(
         {
@@ -640,15 +650,21 @@ export class OriginsService {
           skipster_id: null,
         },
         {
-          skipster_id: skipster_id,
+          skipster_id: newSkipster._id,
           startTime: todayDate,
         },
       );
 
       if (!missionPicked) {
-        // throw error if mission is picked/accepted by someone else
         throw new NotFoundException('Mission already picked');
       }
+
+      // udpate skipster with new mission picked
+      await this.originsData.pushMissionIdInsideSkipster(
+        newSkipster._id,
+        missionPicked._id,
+      );
+
       //  call lambda function
       const lambdaPayload = {
         case: 'accept_mission',

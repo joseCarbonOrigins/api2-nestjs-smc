@@ -57,4 +57,11 @@ export class DashboardController {
   getMissions(@Param('skip') skip: number) {
     return this.dashboardService.getMissions(skip);
   }
+
+  @ApiOperation({ summary: `Get skippys and skipsters information` })
+  @Get('testing')
+  @Header('Access-Control-Allow-Origin', '*')
+  testing() {
+    return this.dashboardService.testing();
+  }
 }

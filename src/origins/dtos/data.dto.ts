@@ -21,15 +21,13 @@ export class SkipsterCreate {
   @IsDate()
   lastSeen?: Date;
 
-  @IsNotEmpty()
   @IsNumber()
   @IsPositive()
-  experience: number;
+  experience?: number;
 
-  @IsNotEmpty()
   @IsNumber()
   @IsPositive()
-  level: number;
+  level?: number;
 }
 
 export class SkipsterQuery {

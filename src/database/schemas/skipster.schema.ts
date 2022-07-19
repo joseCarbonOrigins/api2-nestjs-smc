@@ -15,10 +15,10 @@ export class Skipster extends Document {
   @Prop()
   picture: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: 0 })
   experience: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: 1 })
   level: number;
 
   @Prop({ required: false, default: 0 })
@@ -40,20 +40,20 @@ export class Skipster extends Document {
     raw({
       name: {
         type: String,
-        required: true,
+        // required: true,
       },
       last_name: {
         type: String,
-        required: true,
+        // required: true,
       },
       country: {
         type: String,
-        required: false,
+        // required: false,
         default: 'USA',
       },
       picture: {
         type: String,
-        required: false,
+        // required: false,
         default: 'https://i.imgur.com/XqQXQ.png',
       },
     }),
