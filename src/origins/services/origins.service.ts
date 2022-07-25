@@ -440,7 +440,7 @@ export class OriginsService {
   async updateMissionOrderStatus(payload: UpdateMissionOrderStatusDto) {
     try {
       const { status, orderid, location, skippyname, mission_id } = payload;
-      const todayDate = new Date();
+      // const todayDate = new Date();
       const newLocation = {
         type: 'Point',
         coordinates: [location.lat, location.long],
@@ -465,7 +465,7 @@ export class OriginsService {
 
       switch (status) {
         case 'ARRIVED':
-          await this.originsData.updateSkippy(
+          const skippy = await this.originsData.updateSkippy(
             { email: skippyname },
             {
               mission: 'waiting merchant',
@@ -473,6 +473,11 @@ export class OriginsService {
               location: newLocation,
             },
           );
+
+          // update on skip -> order_info status
+          await this.originsData.updateSkipById(skippy.current_skip_id, {
+            $set: { 'order_info.status': status },
+          });
 
           // send locking mechanism payload to skippy
           await this.lockingService.sendLockingPayload(
