@@ -665,6 +665,27 @@ export class OriginsService {
         missionPicked._id,
       );
 
+      // TODO: update dl when mission 2 is accepted
+      // STARTING MISSION 2
+      if (missionPicked.mission_name === 'Driving to customer') {
+        // send locking mechanism payload to skippy
+        // await this.lockingService.sendLockingPayload(
+        //   missionPicked.skip_id.skippy_id.email,
+        //   'driving_customer',
+        //   1234,
+        //   `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
+        // );
+
+        // update order status based on mission picked up
+        if (!missionPicked.mock) {
+          await this.dl.updateOrderStatus(
+            missionPicked.skip_id.skippy_id.email,
+            missionPicked.skip_id.order_info.order_id,
+            'ENROUTE',
+          );
+        }
+      }
+
       //  call lambda function
       const lambdaPayload = {
         case: 'accept_mission',

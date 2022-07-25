@@ -43,14 +43,14 @@ export class CronjobService {
           skipster_id: null,
         })
         .select(
-          '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
+          'mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
         )
         .populate({
           path: 'skip_id',
-          select: 'skippy_id -_id',
+          select: 'skippy_id',
           populate: {
             path: 'skippy_id',
-            select: 'name email -_id',
+            select: 'name email',
           },
         });
 
@@ -65,6 +65,7 @@ export class CronjobService {
 
       return payload;
     } catch (error) {
+      console.log('error on cron-job endpoint: ', error);
       throw new InternalServerErrorException('Error pushing skippys orders');
     }
   }
@@ -113,6 +114,10 @@ export class CronjobService {
       previous_mission_completed: true,
       previous_mission_id: null,
       mock: false,
+
+      startTime: null,
+      endTime: null,
+      skipster_id: null,
     });
     const newMission2 = new this.missionModel({
       mission_name: 'Driving to customer',
@@ -137,6 +142,10 @@ export class CronjobService {
       previous_mission_completed: false,
       previous_mission_id: newMission1._id,
       mock: false,
+
+      startTime: null,
+      endTime: null,
+      skipster_id: null,
     });
     const newMission3 = new this.missionModel({
       mission_name: 'Driving Home',
@@ -146,7 +155,7 @@ export class CronjobService {
       },
       ending_point: {
         type: 'Point',
-        coordinates: [45.0004353, -93.2705556],
+        coordinates: [45.000674262505754, -93.26999691463327],
       },
       start_address_name: order.customer.address,
       ending_address_name: '1317 County Rd 23, Minneapolis, MN 55413, USA',
@@ -161,6 +170,10 @@ export class CronjobService {
       previous_mission_completed: false,
       previous_mission_id: newMission2._id,
       mock: false,
+
+      startTime: null,
+      endTime: null,
+      skipster_id: null,
     });
     await newMission1.save();
     await newMission2.save();
