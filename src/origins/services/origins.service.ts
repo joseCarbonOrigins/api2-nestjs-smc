@@ -370,7 +370,7 @@ export class OriginsService {
 
       // UPDATE ORDER STATUS
       if (!endedMission.mock) {
-        await this.oldUpdateOrderStatus(
+        await this.dl.updateOrderStatus(
           endedMission.skip_id.skippy_id.email,
           endedMission.skip_id.order_info.order_id,
           'DELIVERED',
@@ -445,13 +445,13 @@ export class OriginsService {
         type: 'Point',
         coordinates: [location.lat, location.long],
       };
-      const dlUpdateOrderStatus = await this.dl.updateOrderStatus(
-        skippyname,
-        orderid,
-        status,
-      );
+      // const dlUpdateOrderStatus = await this.dl.updateOrderStatus(
+      //   skippyname,
+      //   orderid,
+      //   status,
+      // );
 
-      const updateStatusJson = dlUpdateOrderStatus.data;
+      // const updateStatusJson = dlUpdateOrderStatus.data;
 
       const dlGetOrder = await this.dl.getAnOrder(skippyname, orderid);
       const getOrderInfo = dlGetOrder.data;
@@ -473,6 +473,9 @@ export class OriginsService {
               location: newLocation,
             },
           );
+
+          // update on DL
+          await this.dl.updateOrderStatus(skippyname, orderid, status);
 
           // update on skip -> order_info status
           await this.originsData.updateSkipById(skippy.current_skip_id, {
@@ -514,6 +517,9 @@ export class OriginsService {
           //   startTime: todayDate,
           // });
 
+          // update on DL
+          await this.dl.updateOrderStatus(skippyname, orderid, status);
+
           this.twilio.sendSMS(
             customerPhone,
             `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
@@ -526,10 +532,12 @@ export class OriginsService {
             {
               mission: 'waiting delivery',
               status: status,
-              current_skip_id: null,
               location: newLocation,
             },
           );
+
+          // update on DL
+          // await this.dl.updateOrderStatus(skippyname, orderid, status);
 
           this.twilio.sendSMS(
             customerPhone,
@@ -540,7 +548,7 @@ export class OriginsService {
         default:
           break;
       }
-      return updateStatusJson;
+      return { message: 'updated' };
     } catch (error) {
       throw new NotFoundException('Error updating order status');
     }
