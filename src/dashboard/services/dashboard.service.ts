@@ -31,6 +31,20 @@ const monthNames = [
   'December',
 ];
 
+const monthValues = {
+  January: 0,
+  February: 0,
+  March: 0,
+  April: 0,
+  May: 0,
+  June: 0,
+  July: 0,
+  August: 0,
+  September: 0,
+  October: 0,
+  November: 0,
+  December: 0,
+};
 
 @Injectable()
 export class DashboardService {
@@ -300,21 +314,43 @@ export class DashboardService {
   async getSkipstersTimeSheet(query: SkipstersQueryDto): Promise<any> {
     try {
       let { initialDate, endingDate } = query;
+      const currentday = new Date(Date.now());
       //WE NEED TO ADD 1 DAY TO THE ENDING DATE, BECAUSE IS NOT INCLUSIVE
       if (endingDate !== undefined) {
         endingDate = new Date(endingDate);
         endingDate.setDate(endingDate.getDate() + 1);
       }
+      if (initialDate !== undefined) {
+        initialDate = new Date(initialDate);
+      }
       switch (true) {
         case initialDate === undefined && endingDate === undefined:
-          initialDate = new Date('2022-01-01T00:00:00');
-          endingDate = new Date(Date.now());
+          initialDate = new Date(currentday.getFullYear(), 0, 1);
+          endingDate = new Date(currentday.getFullYear(), 11, 31);
           break;
         case initialDate === undefined:
-          initialDate = new Date('2022-01-01T00:00:00');
+          initialDate = new Date(2021, 0, 1);
           break;
         case endingDate === undefined:
           endingDate = new Date(Date.now());
+      }
+      //DEFINE THE SKELETON OF THE EARNINGS
+      let earnings = {};
+      for (
+        let i = initialDate.getFullYear();
+        i <= endingDate.getFullYear();
+        i++
+      ) {
+        earnings[i] = JSON.parse(JSON.stringify(monthValues));
+        if (i === initialDate.getFullYear()) {
+          for (let j = 0; j < initialDate.getMonth(); j++) {
+            delete earnings[i][monthNames[j]];
+          }
+        } else if (i === endingDate.getFullYear()) {
+          for (let j = endingDate.getMonth() + 1; j < 12; j++) {
+            delete earnings[i][monthNames[j]];
+          }
+        }
       }
       const skipsters = await this.skipsterModel
         .find({})
@@ -326,41 +362,43 @@ export class DashboardService {
           match: { startTime: { $gte: initialDate, $lte: endingDate } },
         });
       let coinsPayout = 0;
-      let drivingSeconds = 0;
+      let drivingMiliseconds = 0;
       let missionsAmount = 0;
-      const earningsMap = new Map();
       const answer = skipsters.map((skipster) => {
-        earningsMap.clear();
+        //CLEAR ERANINGS BEFORE FILLING IT WITH NEW DATA
+        for (const year in earnings) {
+          for (const month in earnings[year]) {
+            earnings[year][month] = 0;
+          }
+        }
         coinsPayout = 0;
-        drivingSeconds = 0;
+        drivingMiliseconds = 0;
         missionsAmount = 0;
+
         skipster.missions.forEach((mission) => {
           //REMOVE THIS IF STATEMENT IF YOU WANT TO CONSIDER MOCK MISSIONS
           if ((mission as any).mock === false) {
             coinsPayout += (mission as any).mission_coins;
-            drivingSeconds += (mission as any).driving_time;
+            drivingMiliseconds += (mission as any).driving_time;
             missionsAmount += 1;
-            earningsMap.set(
-              monthNames[(mission as any).startTime.getMonth()],
-              earningsMap.get((mission as any).startTime.getMonth()) +
-                (mission as any).mission_coins ||
-                (mission as any).mission_coins,
-            );
+            earnings[(mission as any).startTime.getFullYear()][
+              monthNames[(mission as any).startTime.getMonth()]
+            ] += (mission as any).mission_coins;
           }
         });
         return {
           nickname: skipster.nickname,
           id: skipster._id,
-          drivingSeconds: drivingSeconds,
+          drivingMiliseconds: drivingMiliseconds,
           missionsAmount: missionsAmount,
           coinsPayout: coinsPayout,
-          earnings: this.strMapToObj(earningsMap),
+          earnings: JSON.parse(JSON.stringify(earnings)),
         };
       });
       const response = {
         data: answer,
       };
-
+      earnings = {};
       return response;
     } catch (e) {
       throw new NotFoundException(
@@ -369,13 +407,23 @@ export class DashboardService {
     }
   }
 
-  strMapToObj(strMap: Map<string, number>): Promise<any> {
-    const obj = Object.create(null);
-    for (const [k, v] of strMap) {
-      // We don’t escape the key '__proto__'
-      // which can cause problems on older engines
-      obj[k] = v;
+  async testingSantiago(): Promise<any> {
+    try {
+      const misiones = await this.missionModel
+        .find({})
+        .select('_id name mission_completed mock skipster_id')
+        .sort({ _id: 'desc' });
+      let resultado = 0;
+      const respuesta = misiones.forEach((mission) => {
+        if ((mission as any).skipster_id === '62b204e9dbce1ef4676a8c96') {
+          resultado += 1;
+        }
+        return { resultado: resultado };
+      });
+      return resultado;
+    } catch (e) {
+      console.log(e);
+      throw new NotFoundException(e);
     }
-    return obj;
   }
 }

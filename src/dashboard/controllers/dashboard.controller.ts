@@ -57,4 +57,10 @@ export class DashboardController {
   getMissions(@Param('skip') skip: number) {
     return this.dashboardService.getMissions(skip);
   }
+  // @ApiOperation({ summary: `testingSantiago` })
+  // @Get('testingSantiago')
+  // @Header('Access-Control-Allow-Origin', '*')
+  // testingSantiago() {
+  //   return this.dashboardService.testingSantiago();
+  // }
 }
