@@ -452,20 +452,21 @@ export class OriginsService {
       // );
 
       // const updateStatusJson = dlUpdateOrderStatus.data;
+      const skippy = await this.originsData.getSkippyByEmail(skippyname);
 
       const dlGetOrder = await this.dl.getAnOrder(skippyname, orderid);
       const getOrderInfo = dlGetOrder.data;
       const dlGetDriver = await this.dl.getDriverInfo(skippyname);
       const getDriverInfo = dlGetDriver.data;
 
-      const restaurantPhone = `+1${getOrderInfo.restaurant[0].PHONE}`;
+      // const restaurantPhone = `+1${getOrderInfo.restaurant[0].PHONE}`;
       const customerPhone = `+1${getOrderInfo.user.PHONE}`;
       const customerName = `${getOrderInfo.user.FNAME}`;
       const skippyColor = `${getDriverInfo.lname}`;
 
       switch (status) {
         case 'ARRIVED':
-          const skippy = await this.originsData.updateSkippy(
+          await this.originsData.updateSkippy(
             { email: skippyname },
             {
               mission: 'waiting merchant',

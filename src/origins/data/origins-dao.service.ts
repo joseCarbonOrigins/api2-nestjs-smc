@@ -101,6 +101,10 @@ export class OriginsDaoService {
     return mission;
   }
 
+  async getSkippyByEmail(skippy: string): Promise<any> {
+    return await this.skippyModel.findOne({ email: skippy });
+  }
+
   async getSkippys(data: SkippysQuery): Promise<any> {
     const skippys = await this.skippyModel.find(data);
     return skippys;
