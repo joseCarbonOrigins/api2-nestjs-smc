@@ -490,12 +490,12 @@ export class OriginsService {
             `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
           );
 
-          if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
-            this.twilio.makeACall(
-              restaurantPhone,
-              'Hello. Skippy. is at your restaurant',
-            );
-          }
+          // if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
+          //   this.twilio.makeACall(
+          //     restaurantPhone,
+          //     'Hello. Skippy. is at your restaurant',
+          //   );
+          // }
 
           this.twilio.sendSMS(
             customerPhone,
@@ -550,6 +550,7 @@ export class OriginsService {
       }
       return { message: 'updated' };
     } catch (error) {
+      console.log('Error updating order status', error);
       throw new NotFoundException('Error updating order status');
     }
   }
