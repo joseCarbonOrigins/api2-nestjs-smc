@@ -179,33 +179,32 @@ export class OriginsService {
     try {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
-      let skipster_id = null;
+      // let skipster_id = null;
+      let newSkipster = null;
       const skipster = await this.originsData.getSkipster({
         nickname: skipster_nickname,
       });
 
+      // ask if skipster is new
       if (!skipster || skipster === null) {
         // creates new skipster
-        const newSkipster = await this.originsData.createSkipster({
+        const newSkipster1 = await this.originsData.createSkipster({
           nickname: skipster_nickname,
           status: 'busy',
           lastSeen: todayDate,
-          // fake experience
-          experience: 10,
-          // fake level
-          level: 1,
         });
-        skipster_id = newSkipster._id;
+        newSkipster = newSkipster1;
       } else {
-        skipster_id = skipster._id;
+        newSkipster = skipster;
       }
+
       const missionPicked = await this.originsData.updateMission(
         {
           _id: mission_id,
           skipster_id: null,
         },
         {
-          skipster_id: skipster_id,
+          skipster_id: newSkipster._id,
           startTime: todayDate,
         },
       );
@@ -213,7 +212,12 @@ export class OriginsService {
       if (!missionPicked) {
         throw new NotFoundException('Mission already picked');
       }
-      const skip = await this.originsData.getSkipById(missionPicked.skip_id);
+
+      // udpate skipster with new mission picked
+      await this.originsData.pushMissionIdInsideSkipster(
+        newSkipster._id,
+        missionPicked._id,
+      );
 
       // STARTING MISSION 1
       if (missionPicked.mission_name === 'Driving to merchant') {
@@ -222,7 +226,7 @@ export class OriginsService {
           missionPicked.skip_id.skippy_id.email,
           'driving_merchant',
           1234,
-          `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
+          `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
         );
       }
 
@@ -233,14 +237,14 @@ export class OriginsService {
           missionPicked.skip_id.skippy_id.email,
           'driving_customer',
           1234,
-          `${skip.order_info.customer.firstName} ${skip.order_info.customer.lastName}`,
+          `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
         );
 
         // update order status based on mission picked up
         if (!missionPicked.mock) {
           await this.dl.updateOrderStatus(
-            skip.skippy_id.email,
-            skip.order_info.order_id,
+            missionPicked.skip_id.skippy_id.email,
+            missionPicked.skip_id.order_info.order_id,
             'ENROUTE',
           );
         }
@@ -366,7 +370,7 @@ export class OriginsService {
 
       // UPDATE ORDER STATUS
       if (!endedMission.mock) {
-        await this.oldUpdateOrderStatus(
+        await this.dl.updateOrderStatus(
           endedMission.skip_id.skippy_id.email,
           endedMission.skip_id.order_info.order_id,
           'DELIVERED',
@@ -436,18 +440,18 @@ export class OriginsService {
   async updateMissionOrderStatus(payload: UpdateMissionOrderStatusDto) {
     try {
       const { status, orderid, location, skippyname, mission_id } = payload;
-      const todayDate = new Date();
+      // const todayDate = new Date();
       const newLocation = {
         type: 'Point',
         coordinates: [location.lat, location.long],
       };
-      const dlUpdateOrderStatus = await this.dl.updateOrderStatus(
-        skippyname,
-        orderid,
-        status,
-      );
+      // const dlUpdateOrderStatus = await this.dl.updateOrderStatus(
+      //   skippyname,
+      //   orderid,
+      //   status,
+      // );
 
-      const updateStatusJson = dlUpdateOrderStatus.data;
+      // const updateStatusJson = dlUpdateOrderStatus.data;
 
       const dlGetOrder = await this.dl.getAnOrder(skippyname, orderid);
       const getOrderInfo = dlGetOrder.data;
@@ -461,7 +465,7 @@ export class OriginsService {
 
       switch (status) {
         case 'ARRIVED':
-          await this.originsData.updateSkippy(
+          const skippy = await this.originsData.updateSkippy(
             { email: skippyname },
             {
               mission: 'waiting merchant',
@@ -469,6 +473,14 @@ export class OriginsService {
               location: newLocation,
             },
           );
+
+          // update on DL
+          await this.dl.updateOrderStatus(skippyname, orderid, status);
+
+          // update on skip -> order_info status
+          await this.originsData.updateSkipById(skippy.current_skip_id, {
+            $set: { 'order_info.status': status },
+          });
 
           // send locking mechanism payload to skippy
           await this.lockingService.sendLockingPayload(
@@ -478,12 +490,12 @@ export class OriginsService {
             `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
           );
 
-          if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
-            this.twilio.makeACall(
-              restaurantPhone,
-              'Hello. Skippy. is at your restaurant',
-            );
-          }
+          // if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
+          //   this.twilio.makeACall(
+          //     restaurantPhone,
+          //     'Hello. Skippy. is at your restaurant',
+          //   );
+          // }
 
           this.twilio.sendSMS(
             customerPhone,
@@ -505,6 +517,9 @@ export class OriginsService {
           //   startTime: todayDate,
           // });
 
+          // update on DL
+          await this.dl.updateOrderStatus(skippyname, orderid, status);
+
           this.twilio.sendSMS(
             customerPhone,
             `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
@@ -517,10 +532,12 @@ export class OriginsService {
             {
               mission: 'waiting delivery',
               status: status,
-              current_skip_id: null,
               location: newLocation,
             },
           );
+
+          // update on DL
+          // await this.dl.updateOrderStatus(skippyname, orderid, status);
 
           this.twilio.sendSMS(
             customerPhone,
@@ -531,8 +548,9 @@ export class OriginsService {
         default:
           break;
       }
-      return updateStatusJson;
+      return { message: 'updated' };
     } catch (error) {
+      console.log('Error updating order status', error);
       throw new NotFoundException('Error updating order status');
     }
   }
@@ -598,10 +616,15 @@ export class OriginsService {
   async unassignMission(payload: UpdateMissionStatus): Promise<any> {
     try {
       const { mission_id } = payload;
-      await this.originsData.updateMissionById(mission_id, {
+      const mission = await this.originsData.updateMissionById(mission_id, {
         skipster_id: null,
         mission_completed: false,
       });
+
+      await this.originsData.removeMissionIdInsideSkipster(
+        mission.skipster_id,
+        mission._id,
+      );
 
       return { message: 'mission unassigned' };
     } catch (error) {
@@ -613,14 +636,14 @@ export class OriginsService {
     try {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
-      let skipster_id = null;
+      let newSkipster = null;
       const skipster = await this.originsData.getSkipster({
         nickname: skipster_nickname,
       });
 
       if (!skipster || skipster === null) {
         // creates new skipster
-        const newSkipster = await this.originsData.createSkipster({
+        const newSkipster1 = await this.originsData.createSkipster({
           nickname: skipster_nickname,
           status: 'busy',
           lastSeen: todayDate,
@@ -629,10 +652,11 @@ export class OriginsService {
           // fake level
           level: 1,
         });
-        skipster_id = newSkipster._id;
+        newSkipster = newSkipster1;
       } else {
-        skipster_id = skipster._id;
+        newSkipster = skipster;
       }
+
       // pick/accept mission if mission is not picked/accepted
       const missionPicked = await this.originsData.updateMission(
         {
@@ -640,15 +664,42 @@ export class OriginsService {
           skipster_id: null,
         },
         {
-          skipster_id: skipster_id,
+          skipster_id: newSkipster._id,
           startTime: todayDate,
         },
       );
 
       if (!missionPicked) {
-        // throw error if mission is picked/accepted by someone else
         throw new NotFoundException('Mission already picked');
       }
+
+      // udpate skipster with new mission picked
+      await this.originsData.pushMissionIdInsideSkipster(
+        newSkipster._id,
+        missionPicked._id,
+      );
+
+      // TODO: update dl when mission 2 is accepted
+      // STARTING MISSION 2
+      if (missionPicked.mission_name === 'Driving to customer') {
+        // send locking mechanism payload to skippy
+        // await this.lockingService.sendLockingPayload(
+        //   missionPicked.skip_id.skippy_id.email,
+        //   'driving_customer',
+        //   1234,
+        //   `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
+        // );
+
+        // update order status based on mission picked up
+        if (!missionPicked.mock) {
+          await this.dl.updateOrderStatus(
+            missionPicked.skip_id.skippy_id.email,
+            missionPicked.skip_id.order_info.order_id,
+            'ENROUTE',
+          );
+        }
+      }
+
       //  call lambda function
       const lambdaPayload = {
         case: 'accept_mission',
