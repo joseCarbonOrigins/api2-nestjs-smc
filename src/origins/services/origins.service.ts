@@ -469,7 +469,7 @@ export class OriginsService {
           await this.originsData.updateSkippy(
             { email: skippyname },
             {
-              mission: 'waiting merchant',
+              mission: 'waiting_merchant',
               status: status,
               location: newLocation,
             },
@@ -507,16 +507,11 @@ export class OriginsService {
           await this.originsData.updateSkippy(
             { email: skippyname },
             {
-              mission: 'driving delivery',
+              mission: 'driving_delivery',
               status: status,
               location: newLocation,
             },
           );
-
-          // starts 2nd mission
-          // await this.originsData.updateMissionById(mission_id, {
-          //   startTime: todayDate,
-          // });
 
           // update on DL
           await this.dl.updateOrderStatus(skippyname, orderid, status);
@@ -531,7 +526,7 @@ export class OriginsService {
           await this.originsData.updateSkippy(
             { email: skippyname },
             {
-              mission: 'waiting delivery',
+              mission: 'waiting_delivery',
               status: status,
               location: newLocation,
             },
@@ -546,6 +541,30 @@ export class OriginsService {
           );
 
           break;
+
+        case 'ARRIVED_CUSTOMER':
+          await this.originsData.updateSkippy(
+            { email: skippyname },
+            {
+              mission: 'arrived_customer',
+              status: status,
+              location: newLocation,
+            },
+          );
+          // update on skip -> order_info status
+          await this.originsData.updateSkipById(skippy.current_skip_id, {
+            $set: { 'order_info.status': status },
+          });
+
+          // send locking mechanism payload to skippy
+          await this.lockingService.sendLockingPayload(
+            skippyname,
+            'arrived_customer',
+            1234,
+            `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
+          );
+          break;
+
         default:
           break;
       }
@@ -615,8 +634,9 @@ export class OriginsService {
   }
 
   async unassignMission(payload: UpdateMissionStatus): Promise<any> {
+    // disengage from mission
     try {
-      const { mission_id } = payload;
+      const { mission_id, skipster_nickname } = payload;
       const mission = await this.originsData.updateMissionById(mission_id, {
         skipster_id: null,
         mission_completed: false,
@@ -626,6 +646,18 @@ export class OriginsService {
         mission.skipster_id,
         mission._id,
       );
+
+      //  call lambda function
+      const lambdaPayload = {
+        case: 'disengage_mission',
+        mission: {
+          id: mission_id,
+        },
+        skipster: {
+          name: skipster_nickname,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
 
       return { message: 'mission unassigned' };
     } catch (error) {
