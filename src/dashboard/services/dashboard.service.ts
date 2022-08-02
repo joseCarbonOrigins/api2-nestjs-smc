@@ -3,6 +3,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
@@ -411,37 +412,45 @@ export class DashboardService {
     }
   }
 
-  async testingSantiago(): Promise<any> {
+  async getSkipsterMissions(skipster: string): Promise<any> {
     try {
-      const misiones = await this.missionModel
-        .find({})
-        .select('_id name mission_completed mock skipster_id')
-        .sort({ _id: 'desc' });
-      let resultado = 0;
-      const respuesta = misiones.forEach((mission) => {
-        if ((mission as any).skipster_id === '62b204e9dbce1ef4676a8c96') {
-          resultado += 1;
-        }
-        return { resultado: resultado };
-      });
-      return resultado;
+      const theSkipster = await this.skipsterModel
+        .findById(new ObjectId(skipster))
+        .select('_id missions');
+      const answer = await this.missionModel
+        .where({
+          _id: { $in: theSkipster.missions },
+        })
+        .select(
+          'mission_name mission_xp mission_coins mock startTime endTime mission_completed estimated_time start_address_name ending_address_name driving_time',
+        )
+        .sort({ endTime: 'desc' });
+      return answer;
     } catch (e) {
       console.log(e);
-      throw new NotFoundException(e);
+      throw new NotFoundException(
+        "getSkipsterMissions - Couldn't get skipster's missions",
+      );
     }
   }
 
-  async testing(): Promise<any> {
-    try {
-      const skipsters = await this.skipsterModel.find({}).populate({
-        path: 'missions',
-        select: 'mission_name mission_coins',
-      });
-
-      return skipsters;
-    } catch (error) {
-      console.log('error...', error);
-      throw new InternalServerErrorException('Error testing');
-    }
-  }
+  // async testingSantiago(): Promise<any> {
+  //   try {
+  //     const misiones = await this.missionModel
+  //       .find({})
+  //       .select('_id name mission_completed mock skipster_id')
+  //       .sort({ _id: 'desc' });
+  //     let resultado = 0;
+  //     const respuesta = misiones.forEach((mission) => {
+  //       if ((mission as any).skipster_id === '62b204e9dbce1ef4676a8c96') {
+  //         resultado += 1;
+  //       }
+  //       return { resultado: resultado };
+  //     });
+  //     return resultado;
+  //   } catch (e) {
+  //     console.log(e);
+  //     throw new NotFoundException(e);
+  //   }
+  // }
 }
