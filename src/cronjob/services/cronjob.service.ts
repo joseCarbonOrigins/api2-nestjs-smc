@@ -43,7 +43,7 @@ export class CronjobService {
           skipster_id: null,
         })
         .select(
-          'mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
+          'mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock mission_completed',
         )
         .populate({
           path: 'skip_id',

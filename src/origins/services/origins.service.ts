@@ -537,7 +537,7 @@ export class OriginsService {
 
           this.twilio.sendSMS(
             customerPhone,
-            `Hello ${customerName}. Your order is at your door. The color of your Skippy is ${skippyColor} :)`,
+            `Hello ${customerName}. Your order is at your door. The pin code for the robot is 1122`,
           );
 
           break;
@@ -560,7 +560,7 @@ export class OriginsService {
           await this.lockingService.sendLockingPayload(
             skippyname,
             'arrived_customer',
-            1234,
+            1122,
             `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
           );
           break;
@@ -711,17 +711,18 @@ export class OriginsService {
         newSkipster._id,
         missionPicked._id,
       );
+      // STARTING MISSION 1
+      // SEND LOCKING MECHANISM PAYLOAD
 
-      // TODO: update dl when mission 2 is accepted
       // STARTING MISSION 2
       if (missionPicked.mission_name === 'Driving to customer') {
         // send locking mechanism payload to skippy
-        // await this.lockingService.sendLockingPayload(
-        //   missionPicked.skip_id.skippy_id.email,
-        //   'driving_customer',
-        //   1234,
-        //   `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
-        // );
+        await this.lockingService.sendLockingPayload(
+          missionPicked.skip_id.skippy_id.email,
+          'driving_customer',
+          1122,
+          `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
+        );
 
         // update order status based on mission picked up
         if (!missionPicked.mock) {
@@ -747,6 +748,7 @@ export class OriginsService {
 
       return { message: 'mission accepted', mission: missionPicked };
     } catch (error) {
+      console.log('error accepting the mission ', error);
       throw new NotFoundException('Error accepting the mission');
     }
   }
