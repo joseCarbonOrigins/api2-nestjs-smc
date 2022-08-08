@@ -2,11 +2,12 @@ import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Skip } from './skip.schema';
 import { Skipster } from './skipster.schema';
+import { Mission_State } from './enums';
 
 @Schema()
 export class Mission extends Document {
   @Prop()
-  mission_name: string;
+  mission_name: Mission_State;
 
   @Prop()
   mission_xp: number;

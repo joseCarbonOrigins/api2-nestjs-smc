@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-// aws
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose'; // aws
 import { LambdaService } from '../../external/services/lambda.service';
 // dtos
 import {
@@ -8,15 +13,20 @@ import {
   UpdateMissionStatus,
   AcceptDeclineMissionDto,
 } from '../dtos/missions.dto';
+import { CamerasArrangementDto } from '../dtos/skippy.dto';
 // external services
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
 import { TwilioService } from '../../external/services/twilio.service';
 import { OriginsDaoService } from '../data/origins-dao.service';
 import { LockingMechanismService } from 'src/external/services/locking-mechanism.service';
+// schemas
+import { Skippy } from '../../database/schemas/skippy.schema';
 
 @Injectable()
 export class OriginsService {
   constructor(
+    @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
+
     private originsData: OriginsDaoService,
     private twilio: TwilioService,
     private dl: DeliverLogicService,
@@ -774,20 +784,48 @@ export class OriginsService {
       throw new NotFoundException('Error declining the mission');
     }
   }
-  // async test(): Promise<any> {
-  //   try {
-  //     const missions = await this.originsData.getMissions({
-  //       // mission_completed: false,
-  //       // previous_mission_completed: true,
-  //       // skipster_id: null,
-  //     });
 
-  //     return missions;
-  //   } catch (error) {
-  //     console.log('error: ', error);
-  //     throw new InternalServerErrorException('Error getting all missions');
-  //   }
-  // }
+  async getSkippyData(skippyname: string): Promise<any> {
+    try {
+      const theSkippy = await this.skippyModel
+        .where({
+          email: skippyname,
+        })
+        .select('name email ip_address cameras_arrangement');
+      const response = (({ name, email, ip_address, cameras_arrangement }) => ({
+        name,
+        email,
+        ip_address,
+        cameras_arrangement,
+      }))(theSkippy[0]);
+      return response;
+    } catch (error) {
+      throw new NotFoundException('getSkippyData - Couldnt return skippy data');
+    }
+  }
+
+  async setSkippyCameras(
+    skippyname: string,
+    arrange: CamerasArrangementDto,
+  ): Promise<any> {
+    try {
+      const theSkippy = await this.skippyModel.findOneAndUpdate(
+        { email: skippyname },
+        { cameras_arrangement: arrange.cameras },
+      );
+      const response = (({ name, email }) => ({
+        name,
+        email,
+      }))(theSkippy);
+      Object.assign(response, { cameras_arrangement: arrange.cameras });
+      return response;
+    } catch (error) {
+      throw new NotFoundException(
+        'setSkippyCameras - Couldnt change cameras arrangement',
+      );
+    }
+  }
+
 
   async testSMS(payload: any): Promise<any> {
     try {

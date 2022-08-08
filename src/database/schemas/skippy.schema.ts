@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Mission_State, Status } from './enums';
 
 @Schema()
 export class Skippy extends Document {
@@ -10,10 +11,10 @@ export class Skippy extends Document {
   email: string;
 
   @Prop({ required: true })
-  mission: string;
+  mission: Mission_State;
 
   @Prop({ required: true })
-  status: string;
+  status: Status;
 
   @Prop()
   current_skip_id: Types.ObjectId;
@@ -38,6 +39,15 @@ export class Skippy extends Document {
 
   @Prop({ ref: 'Mission', default: [] })
   missions: [Types.ObjectId];
+
+  @Prop({ required: true, default: [1, 2, 3, 4, 5] })
+  cameras_arrangement: number[];
+
+  @Prop({ required: false })
+  short_id: string;
+
+  @Prop({ required: true })
+  ip_address: string;
 }
 
 export const SkippySchema = SchemaFactory.createForClass(Skippy);
