@@ -532,13 +532,10 @@ export class OriginsService {
             },
           );
 
-          // update on DL
-          // await this.dl.updateOrderStatus(skippyname, orderid, status);
-
-          this.twilio.sendSMS(
-            customerPhone,
-            `Hello ${customerName}. Your order is at your door. The pin code for the robot is 1122`,
-          );
+          // this.twilio.sendSMS(
+          //   customerPhone,
+          //   `Hello ${customerName}. Your order is at your door. The pin code for the robot is 1122`,
+          // );
 
           break;
 
@@ -555,6 +552,12 @@ export class OriginsService {
           await this.originsData.updateSkipById(skippy.current_skip_id, {
             $set: { 'order_info.status': status },
           });
+
+          // send sms notification to customer
+          this.twilio.sendSMS(
+            customerPhone,
+            `Hello ${customerName}. Your order is at your door. The pin code for the robot is 1122`,
+          );
 
           // send locking mechanism payload to skippy
           await this.lockingService.sendLockingPayload(
@@ -785,4 +788,18 @@ export class OriginsService {
   //     throw new InternalServerErrorException('Error getting all missions');
   //   }
   // }
+
+  async testSMS(payload: any): Promise<any> {
+    try {
+      const { customerPhone, customerName } = payload;
+      this.twilio.sendSMS(
+        customerPhone,
+        `Hello ${customerName}. Your order is at your door. The pin code for the robot is 1122`,
+      );
+      return { message: 'message sent' };
+    } catch (error) {
+      console.error('error sending sms text...', error);
+      throw new NotFoundException('Error sending sms text notification');
+    }
+  }
 }

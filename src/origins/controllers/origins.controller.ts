@@ -120,6 +120,13 @@ export class OriginsController {
     return this.originsService.declineMission(payload);
   }
 
+  @ApiOperation({ summary: 'Receive skippys orders' })
+  @Post('sms')
+  @Header('Access-Control-Allow-Origin', '*')
+  testSMS(@Body() payload: any) {
+    return this.originsService.testSMS(payload);
+  }
+
   // @Get('test')
   // @Header('Access-Control-Allow-Origin', '*')
   // test() {
