@@ -137,4 +137,12 @@ export class OriginsController {
   ) {
     return this.originsService.setSkippyCameras(skippyname, arrange);
   }
+
+  @ApiOperation({ summary: 'Receive skippys orders' })
+  @Post('sms')
+  @Header('Access-Control-Allow-Origin', '*')
+  testSMS(@Body() payload: any) {
+    return this.originsService.testSMS(payload);
+  }
+
 }

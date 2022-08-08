@@ -10,8 +10,9 @@ import { DeliverLogicService } from '../../external/services/deliver-logic.servi
 // schemas
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
-
 import { Skipster } from 'src/database/schemas/skipster.schema';
+// aws
+import { LambdaService } from '../../external/services/lambda.service';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
@@ -54,7 +55,7 @@ export class DashboardService {
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
     @InjectModel(Skipster.name) private skipsterModel: Model<Skipster>,
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
-
+    private lambdaService: LambdaService,
     private dl: DeliverLogicService,
   ) {}
 
@@ -190,6 +191,15 @@ export class DashboardService {
       if (!finishedMission) {
         throw new NotFoundException('Could not find mission');
       }
+
+      //  call lambda function
+      const lambdaPayload = {
+        case: 'complete_mission',
+        mission: {
+          id: mission_id,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
 
       const previousMission = await this.missionModel.findOneAndUpdate(
         {
