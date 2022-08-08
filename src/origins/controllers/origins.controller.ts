@@ -18,6 +18,7 @@ import {
   UpdateMissionStatus,
   AcceptDeclineMissionDto,
 } from '../dtos/missions.dto';
+import { CamerasArrangementDto } from '../dtos/skippy.dto';
 
 @ApiTags('Origins')
 @Controller('origins')
@@ -120,9 +121,20 @@ export class OriginsController {
     return this.originsService.declineMission(payload);
   }
 
-  // @Get('test')
-  // @Header('Access-Control-Allow-Origin', '*')
-  // test() {
-  //   return this.originsService.test();
-  // }
+  @ApiOperation({ summary: 'Get skippys data' })
+  @Get('skippy/:skippyname')
+  @Header('Access-Control-Allow-Origin', '*')
+  getSkippyData(@Param('skippyname') skippyname: string) {
+    return this.originsService.getSkippyData(skippyname);
+  }
+
+  @ApiOperation({ summary: 'Set skippys cameras arrangement' })
+  @Post('skippy/:skippyname/cameras')
+  @Header('Access-Control-Allow-Origin', '*')
+  setSkippyCameras(
+    @Param('skippyname') skippyname: string,
+    @Body() arrange: CamerasArrangementDto,
+  ) {
+    return this.originsService.setSkippyCameras(skippyname, arrange);
+  }
 }

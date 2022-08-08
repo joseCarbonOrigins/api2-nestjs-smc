@@ -1,13 +1,13 @@
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-
+import { Skipster_Type, Status } from './enums';
 @Schema()
 export class Skipster extends Document {
   @Prop({ required: true, unique: true })
   nickname: string;
 
   @Prop({ required: true })
-  status: string;
+  status: Status;
 
   @Prop()
   lastSeen: Date;
@@ -59,6 +59,9 @@ export class Skipster extends Document {
     }),
   )
   personal_information: Record<any, any>;
+
+  @Prop({ required: true, default: 'shift' })
+  type: Skipster_Type;
 }
 
 export const SkipsterSchema = SchemaFactory.createForClass(Skipster);
