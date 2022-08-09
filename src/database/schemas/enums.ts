@@ -1,29 +1,33 @@
 export const enum Status {
-  'active',
-  'inactive',
-  'busy',
+  active = 'active',
+  inactive = 'inactive',
+  busy = 'busy',
 }
 
 export const enum Mission_State {
-  'waiting_order',
-  'driving_merchant',
-  'waiting_merchant',
-  'driving_delivery',
-  'waiting_delivery',
-  'driving_home',
-  'driving_fix',
+  waiting_order = 'waiting_order',
+  driving_merchant = 'driving_merchant',
+  waiting_merchant = 'waiting_merchant',
+  driving_delivery = 'driving_delivery',
+  waiting_delivery = 'waiting_delivery',
+  driving_home = 'driving_home',
+  driving_fix = 'driving_fix',
+  Driving_to_merchant = 'Driving to merchant',
+  Driving_to_customer = 'Driving to customer',
+  Driving_Home = 'Driving Home',
 }
 
 export const enum Order_Satus {
-  'new',
-  'confirmed',
-  'placing',
-  'placed',
-  'arrived',
-  'enroute',
-  'delivered',
+  new = 'new',
+  confirmed = 'confirmed',
+  placing = 'placing',
+  placed = 'placed',
+  arrived = 'arrived',
+  enroute = 'enroute',
+  delivered = 'delivered',
 }
+
 export const enum Skipster_Type {
-  'shift',
-  'gig',
+  shift = 'shift',
+  gig = 'gig',
 }
