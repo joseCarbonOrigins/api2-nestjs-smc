@@ -37,139 +37,139 @@ export class OriginsService {
   async getAvailableMissions(): Promise<any> {
     try {
       // get skippies that not are doing skip
-      const skippies = await this.originsData.getSkippys({
-        current_skip_id: null,
-      });
+      // const skippies = await this.originsData.getSkippys({
+      //   current_skip_id: null,
+      // });
 
-      for await (const skippy of skippies) {
-        // ask DL to get current order for skippy
-        const dlResponse = await this.dl.getAllOrdersDriver(skippy.email);
+      // for await (const skippy of skippies) {
+      //   // ask DL to get current order for skippy
+      //   const dlResponse = await this.dl.getAllOrdersDriver(skippy.email);
 
-        // if there is an order, create new skip and slice into missions
-        if (dlResponse.data.INPROGRESS) {
-          const dlOrder: any = dlResponse.data.INPROGRESS[0];
-          // CREATE NEW SKIP AND ORDER
-          const orderInfo = {
-            order_id: dlOrder.oid,
-            status: dlOrder.status,
-            customer: {
-              firstName: dlOrder.dropoff.FNAME,
-              lastName: dlOrder.dropoff.LNAME,
-              lat: dlOrder.dropoff.LAT,
-              long: dlOrder.dropoff.LONG,
-              address: dlOrder.dropoff.ADDRESS1,
-              zip: dlOrder.dropoff.ZIP,
-            },
-            restaurant: {
-              name: dlOrder.pickup.NAME,
-              lat: dlOrder.pickup.LAT,
-              long: dlOrder.pickup.LONG,
-              address: dlOrder.pickup.ADDRESS1,
-              zip: dlOrder.pickup.ZIP,
-            },
-          };
-          const newSkip = await this.originsData.createSkip({
-            startTime: dlOrder.start_time,
-            skippy_id: skippy._id,
-            order_info: orderInfo,
-            mock: false,
-          });
+      //   // if there is an order, create new skip and slice into missions
+      //   if (dlResponse.data.INPROGRESS) {
+      //     const dlOrder: any = dlResponse.data.INPROGRESS[0];
+      //     // CREATE NEW SKIP AND ORDER
+      //     const orderInfo = {
+      //       order_id: dlOrder.oid,
+      //       status: dlOrder.status,
+      //       customer: {
+      //         firstName: dlOrder.dropoff.FNAME,
+      //         lastName: dlOrder.dropoff.LNAME,
+      //         lat: dlOrder.dropoff.LAT,
+      //         long: dlOrder.dropoff.LONG,
+      //         address: dlOrder.dropoff.ADDRESS1,
+      //         zip: dlOrder.dropoff.ZIP,
+      //       },
+      //       restaurant: {
+      //         name: dlOrder.pickup.NAME,
+      //         lat: dlOrder.pickup.LAT,
+      //         long: dlOrder.pickup.LONG,
+      //         address: dlOrder.pickup.ADDRESS1,
+      //         zip: dlOrder.pickup.ZIP,
+      //       },
+      //     };
+      //     const newSkip = await this.originsData.createSkip({
+      //       startTime: dlOrder.start_time,
+      //       skippy_id: skippy._id,
+      //       order_info: orderInfo,
+      //       mock: false,
+      //     });
 
-          await this.originsData.updateSkippyById(skippy._id, {
-            current_skip_id: newSkip._id,
-          });
+      //     await this.originsData.updateSkippyById(skippy._id, {
+      //       current_skip_id: newSkip._id,
+      //     });
 
-          // slice into missions
-          // creating mission-1
-          const newMission1 = await this.originsData.createMission({
-            mission_name: 'Driving to merchant',
-            // DUMMY START POINT
-            // ADD: experience, coins
-            start_point: skippy.location,
-            ending_point: {
-              type: 'Point',
-              coordinates: [dlOrder.pickup.LAT, dlOrder.pickup.LONG],
-            },
-            start_address_name: 'NOT PROVIDED YET',
-            ending_address_name: dlOrder.pickup.ADDRESS1,
-            skip_id: newSkip._id,
+      //     // slice into missions
+      //     // creating mission-1
+      //     const newMission1 = await this.originsData.createMission({
+      //       mission_name: 'Driving to merchant',
+      //       // DUMMY START POINT
+      //       // ADD: experience, coins
+      //       start_point: skippy.location,
+      //       ending_point: {
+      //         type: 'Point',
+      //         coordinates: [dlOrder.pickup.LAT, dlOrder.pickup.LONG],
+      //       },
+      //       start_address_name: 'NOT PROVIDED YET',
+      //       ending_address_name: dlOrder.pickup.ADDRESS1,
+      //       skip_id: newSkip._id,
 
-            // fake values
-            mission_xp: 15,
-            mission_coins: 15,
-            estimated_time: 900,
+      //       // fake values
+      //       mission_xp: 15,
+      //       mission_coins: 15,
+      //       estimated_time: 900,
 
-            mission_completed: false,
-            previous_mission_completed: true,
-            previous_mission_id: null,
-            mock: false,
+      //       mission_completed: false,
+      //       previous_mission_completed: true,
+      //       previous_mission_id: null,
+      //       mock: false,
 
-            startTime: null,
-            endTime: null,
-            skipster_id: null,
-          });
-          // creating mission-2
-          const newMission2 = await this.originsData.createMission({
-            mission_name: 'Driving to customer',
-            start_point: {
-              type: 'Point',
-              coordinates: [dlOrder.pickup.LAT, dlOrder.pickup.LONG],
-            },
-            ending_point: {
-              type: 'Point',
-              coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
-            },
-            start_address_name: dlOrder.pickup.ADDRESS1,
-            ending_address_name: dlOrder.dropoff.ADDRESS1,
-            skip_id: newSkip._id,
+      //       startTime: null,
+      //       endTime: null,
+      //       skipster_id: null,
+      //     });
+      //     // creating mission-2
+      //     const newMission2 = await this.originsData.createMission({
+      //       mission_name: 'Driving to customer',
+      //       start_point: {
+      //         type: 'Point',
+      //         coordinates: [dlOrder.pickup.LAT, dlOrder.pickup.LONG],
+      //       },
+      //       ending_point: {
+      //         type: 'Point',
+      //         coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
+      //       },
+      //       start_address_name: dlOrder.pickup.ADDRESS1,
+      //       ending_address_name: dlOrder.dropoff.ADDRESS1,
+      //       skip_id: newSkip._id,
 
-            // fake values
-            mission_xp: 15,
-            mission_coins: 15,
-            estimated_time: 900,
+      //       // fake values
+      //       mission_xp: 15,
+      //       mission_coins: 15,
+      //       estimated_time: 900,
 
-            mission_completed: false,
-            previous_mission_completed: false,
-            previous_mission_id: newMission1._id,
-            mock: false,
+      //       mission_completed: false,
+      //       previous_mission_completed: false,
+      //       previous_mission_id: newMission1._id,
+      //       mock: false,
 
-            startTime: null,
-            endTime: null,
-            skipster_id: null,
-          });
+      //       startTime: null,
+      //       endTime: null,
+      //       skipster_id: null,
+      //     });
 
-          // creating mission-3
-          await this.originsData.createMission({
-            mission_name: 'Driving Home',
-            start_point: {
-              type: 'Point',
-              coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
-            },
-            ending_point: {
-              type: 'Point',
-              coordinates: [45.000674262505754, -93.26999691463327],
-            },
-            start_address_name: dlOrder.dropoff.ADDRESS1,
-            ending_address_name:
-              '1317 County Rd 23, Minneapolis, MN 55413, USA',
-            skip_id: newSkip._id,
+      //     // creating mission-3
+      //     await this.originsData.createMission({
+      //       mission_name: 'Driving Home',
+      //       start_point: {
+      //         type: 'Point',
+      //         coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
+      //       },
+      //       ending_point: {
+      //         type: 'Point',
+      //         coordinates: [45.000674262505754, -93.26999691463327],
+      //       },
+      //       start_address_name: dlOrder.dropoff.ADDRESS1,
+      //       ending_address_name:
+      //         '1317 County Rd 23, Minneapolis, MN 55413, USA',
+      //       skip_id: newSkip._id,
 
-            // fake values
-            mission_xp: 15,
-            mission_coins: 15,
-            estimated_time: 900,
+      //       // fake values
+      //       mission_xp: 15,
+      //       mission_coins: 15,
+      //       estimated_time: 900,
 
-            mission_completed: false,
-            previous_mission_completed: false,
-            previous_mission_id: newMission2._id,
-            mock: false,
+      //       mission_completed: false,
+      //       previous_mission_completed: false,
+      //       previous_mission_id: newMission2._id,
+      //       mock: false,
 
-            startTime: null,
-            endTime: null,
-            skipster_id: null,
-          });
-        }
-      }
+      //       startTime: null,
+      //       endTime: null,
+      //       skipster_id: null,
+      //     });
+      //   }
+      // }
 
       // returning incompleted missions
       const missions = await this.originsData.getMissions({
@@ -825,7 +825,6 @@ export class OriginsService {
       );
     }
   }
-
 
   async testSMS(payload: any): Promise<any> {
     try {
