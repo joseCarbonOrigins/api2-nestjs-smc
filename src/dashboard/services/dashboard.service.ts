@@ -178,6 +178,14 @@ export class DashboardService {
   async forceFinishMissions(body: MissionQueryDto): Promise<any> {
     try {
       const { mission_id } = body;
+      //  call lambda function
+      const lambdaPayload = {
+        case: 'complete_mission',
+        mission: {
+          id: mission_id,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
 
       const finishedMission = await this.missionModel
         .findByIdAndUpdate(mission_id, {
@@ -191,15 +199,6 @@ export class DashboardService {
       if (!finishedMission) {
         throw new NotFoundException('Could not find mission');
       }
-
-      //  call lambda function
-      const lambdaPayload = {
-        case: 'complete_mission',
-        mission: {
-          id: mission_id,
-        },
-      };
-      this.lambdaService.invokeLambda(lambdaPayload);
 
       const previousMission = await this.missionModel.findOneAndUpdate(
         {
