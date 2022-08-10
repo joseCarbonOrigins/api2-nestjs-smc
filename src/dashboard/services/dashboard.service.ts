@@ -228,6 +228,7 @@ export class DashboardService {
 
       return { message: 'mission finished' };
     } catch (e) {
+      console.log('Error finishing the mission: ', e);
       throw new InternalServerErrorException('Internal server error');
     }
   }
