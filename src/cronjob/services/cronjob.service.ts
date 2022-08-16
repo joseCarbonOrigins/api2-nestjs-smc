@@ -175,9 +175,20 @@ export class CronjobService {
       endTime: null,
       skipster_id: null,
     });
+
     await newMission1.save();
     await newMission2.save();
     await newMission3.save();
+
+    await this.skipModel.findByIdAndUpdate(newSkip._id, {
+      $push: { missions: newMission1 },
+    });
+    await this.skipModel.findByIdAndUpdate(newSkip._id, {
+      $push: { missions: newMission2 },
+    });
+    await this.skipModel.findByIdAndUpdate(newSkip._id, {
+      $push: { missions: newMission3 },
+    });
   }
 }
 

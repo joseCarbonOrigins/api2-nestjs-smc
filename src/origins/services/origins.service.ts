@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose'; // aws
 import { LambdaService } from '../../external/services/lambda.service';
+import { FunctionsService } from '../../external/services/functions.service';
 // dtos
 import {
   PickMissionDto,
@@ -26,151 +27,16 @@ import { Skippy } from '../../database/schemas/skippy.schema';
 export class OriginsService {
   constructor(
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
-
     private originsData: OriginsDaoService,
     private twilio: TwilioService,
     private dl: DeliverLogicService,
     private lambdaService: LambdaService,
     private lockingService: LockingMechanismService,
+    private functionService: FunctionsService,
   ) {}
 
   async getAvailableMissions(): Promise<any> {
     try {
-      // get skippies that not are doing skip
-      // const skippies = await this.originsData.getSkippys({
-      //   current_skip_id: null,
-      // });
-
-      // for await (const skippy of skippies) {
-      //   // ask DL to get current order for skippy
-      //   const dlResponse = await this.dl.getAllOrdersDriver(skippy.email);
-
-      //   // if there is an order, create new skip and slice into missions
-      //   if (dlResponse.data.INPROGRESS) {
-      //     const dlOrder: any = dlResponse.data.INPROGRESS[0];
-      //     // CREATE NEW SKIP AND ORDER
-      //     const orderInfo = {
-      //       order_id: dlOrder.oid,
-      //       status: dlOrder.status,
-      //       customer: {
-      //         firstName: dlOrder.dropoff.FNAME,
-      //         lastName: dlOrder.dropoff.LNAME,
-      //         lat: dlOrder.dropoff.LAT,
-      //         long: dlOrder.dropoff.LONG,
-      //         address: dlOrder.dropoff.ADDRESS1,
-      //         zip: dlOrder.dropoff.ZIP,
-      //       },
-      //       restaurant: {
-      //         name: dlOrder.pickup.NAME,
-      //         lat: dlOrder.pickup.LAT,
-      //         long: dlOrder.pickup.LONG,
-      //         address: dlOrder.pickup.ADDRESS1,
-      //         zip: dlOrder.pickup.ZIP,
-      //       },
-      //     };
-      //     const newSkip = await this.originsData.createSkip({
-      //       startTime: dlOrder.start_time,
-      //       skippy_id: skippy._id,
-      //       order_info: orderInfo,
-      //       mock: false,
-      //     });
-
-      //     await this.originsData.updateSkippyById(skippy._id, {
-      //       current_skip_id: newSkip._id,
-      //     });
-
-      //     // slice into missions
-      //     // creating mission-1
-      //     const newMission1 = await this.originsData.createMission({
-      //       mission_name: 'Driving to merchant',
-      //       // DUMMY START POINT
-      //       // ADD: experience, coins
-      //       start_point: skippy.location,
-      //       ending_point: {
-      //         type: 'Point',
-      //         coordinates: [dlOrder.pickup.LAT, dlOrder.pickup.LONG],
-      //       },
-      //       start_address_name: 'NOT PROVIDED YET',
-      //       ending_address_name: dlOrder.pickup.ADDRESS1,
-      //       skip_id: newSkip._id,
-
-      //       // fake values
-      //       mission_xp: 15,
-      //       mission_coins: 15,
-      //       estimated_time: 900,
-
-      //       mission_completed: false,
-      //       previous_mission_completed: true,
-      //       previous_mission_id: null,
-      //       mock: false,
-
-      //       startTime: null,
-      //       endTime: null,
-      //       skipster_id: null,
-      //     });
-      //     // creating mission-2
-      //     const newMission2 = await this.originsData.createMission({
-      //       mission_name: 'Driving to customer',
-      //       start_point: {
-      //         type: 'Point',
-      //         coordinates: [dlOrder.pickup.LAT, dlOrder.pickup.LONG],
-      //       },
-      //       ending_point: {
-      //         type: 'Point',
-      //         coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
-      //       },
-      //       start_address_name: dlOrder.pickup.ADDRESS1,
-      //       ending_address_name: dlOrder.dropoff.ADDRESS1,
-      //       skip_id: newSkip._id,
-
-      //       // fake values
-      //       mission_xp: 15,
-      //       mission_coins: 15,
-      //       estimated_time: 900,
-
-      //       mission_completed: false,
-      //       previous_mission_completed: false,
-      //       previous_mission_id: newMission1._id,
-      //       mock: false,
-
-      //       startTime: null,
-      //       endTime: null,
-      //       skipster_id: null,
-      //     });
-
-      //     // creating mission-3
-      //     await this.originsData.createMission({
-      //       mission_name: 'Driving Home',
-      //       start_point: {
-      //         type: 'Point',
-      //         coordinates: [dlOrder.dropoff.LAT, dlOrder.dropoff.LONG],
-      //       },
-      //       ending_point: {
-      //         type: 'Point',
-      //         coordinates: [45.000674262505754, -93.26999691463327],
-      //       },
-      //       start_address_name: dlOrder.dropoff.ADDRESS1,
-      //       ending_address_name:
-      //         '1317 County Rd 23, Minneapolis, MN 55413, USA',
-      //       skip_id: newSkip._id,
-
-      //       // fake values
-      //       mission_xp: 15,
-      //       mission_coins: 15,
-      //       estimated_time: 900,
-
-      //       mission_completed: false,
-      //       previous_mission_completed: false,
-      //       previous_mission_id: newMission2._id,
-      //       mock: false,
-
-      //       startTime: null,
-      //       endTime: null,
-      //       skipster_id: null,
-      //     });
-      //   }
-      // }
-
       // returning incompleted missions
       const missions = await this.originsData.getMissions({
         mission_completed: false,
@@ -319,11 +185,25 @@ export class OriginsService {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
 
-      const endedMission = await this.originsData.updateMissionById(
-        mission_id,
-        { mission_completed: true, endTime: todayDate },
+      // calculate driving time
+      const mission = await this.originsData.getMissionById(mission_id);
+      const drivingTime = this.functionService.calculateDrivingTime(
+        mission.startTime,
+        todayDate,
       );
 
+      const endedMission = await this.originsData.updateMissionById(
+        mission_id,
+        {
+          mission_completed: true,
+          endTime: todayDate,
+          driving_time: drivingTime,
+        },
+      );
+
+      // add driving time to skipster
+
+      // update mission to completed
       await this.originsData.updateMission(
         {
           previous_mission_id: endedMission._id,
@@ -355,14 +235,25 @@ export class OriginsService {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
 
+      // calculate driving time
+      const mission = await this.originsData.getMissionById(mission_id);
+      const drivingTime = this.functionService.calculateDrivingTime(
+        mission.startTime,
+        todayDate,
+      );
+
       const endedMission = await this.originsData.updateMissionById(
         mission_id,
         {
           mission_completed: true,
           endTime: todayDate,
+          driving_time: drivingTime,
         },
       );
 
+      // add driving time to skipster
+
+      // update mission to completed
       await this.originsData.updateMission(
         {
           previous_mission_id: endedMission._id,
@@ -412,13 +303,23 @@ export class OriginsService {
       const { mission_id, skipster_nickname } = payload;
       const todayDate = new Date();
 
+      // calculate driving time
+      const mission = await this.originsData.getMissionById(mission_id);
+      const drivingTime = this.functionService.calculateDrivingTime(
+        mission.startTime,
+        todayDate,
+      );
+
       const endedMission = await this.originsData.updateMissionById(
         mission_id,
         {
           mission_completed: true,
           endTime: todayDate,
+          driving_time: drivingTime,
         },
       );
+
+      // add driving time to skipster
 
       await this.originsData.updateSkippy(
         {
@@ -719,9 +620,14 @@ export class OriginsService {
         throw new NotFoundException('Mission already picked');
       }
 
-      // udpate skipster with new mission picked
+      // udpate skipster with new mission accepted
       await this.originsData.pushMissionIdInsideSkipster(
         newSkipster._id,
+        missionPicked._id,
+      );
+      // update skippy with new mission accepted
+      await this.originsData.pushMissionIdInsideSkippy(
+        missionPicked.skip_id.skippy_id._id,
         missionPicked._id,
       );
       // STARTING MISSION 1
