@@ -21,6 +21,7 @@ import { FunctionsService } from './services/functions.service';
     TwilioService,
     LambdaService,
     LockingMechanismService,
+    FunctionsService,
   ],
 })
 export class ExternalModule {}
