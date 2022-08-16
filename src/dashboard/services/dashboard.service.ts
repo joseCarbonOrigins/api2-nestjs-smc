@@ -16,6 +16,8 @@ import { LambdaService } from '../../external/services/lambda.service';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
+import { SkippyModidyDto } from '../dto/skippy.dto';
+// schemas
 import { Skip } from '../../database/schemas/skip.schema';
 
 const monthNames = [
@@ -440,6 +442,20 @@ export class DashboardService {
       console.log(e);
       throw new NotFoundException(
         "getSkipsterMissions - Couldn't get skipster's missions",
+      );
+    }
+  }
+
+  async modidySkippy(skippyemail: string, body: SkippyModidyDto): Promise<any> {
+    try {
+      const skippy = await this.skippyModel
+        .findOneAndUpdate({ email: skippyemail }, body)
+        .select('name email current_skip ip_address');
+      return skippy;
+    } catch (error) {
+      console.log('error modifying skippys information');
+      throw new InternalServerErrorException(
+        'Could not modify skippy information',
       );
     }
   }

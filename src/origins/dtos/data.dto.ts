@@ -69,6 +69,9 @@ export class MissionUpdate {
   @IsDate()
   endTime?: Date;
 
+  @IsNumber()
+  driving_time?: number;
+
   @IsBoolean()
   mission_completed?: boolean;
 

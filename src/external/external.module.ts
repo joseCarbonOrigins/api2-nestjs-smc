@@ -4,6 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 import { TwilioService } from './services/twilio.service';
 import { LambdaService } from './services/lambda.service';
 import { LockingMechanismService } from './services/locking-mechanism.service';
+import { FunctionsService } from './services/functions.service';
 
 @Global()
 @Module({
@@ -13,12 +14,14 @@ import { LockingMechanismService } from './services/locking-mechanism.service';
     TwilioService,
     LambdaService,
     LockingMechanismService,
+    FunctionsService,
   ],
   exports: [
     DeliverLogicService,
     TwilioService,
     LambdaService,
     LockingMechanismService,
+    FunctionsService,
   ],
 })
 export class ExternalModule {}
