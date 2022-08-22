@@ -48,7 +48,7 @@ export class OriginsDaoService {
     const mission = await this.missionModel
       .findById(missionId)
       .select(
-        '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name',
+        '_id mission_name mission_xp mission_coins estimated_time startTime start_point ending_point start_address_name ending_address_name',
       )
       .populate({
         path: 'skip_id',
@@ -167,6 +167,26 @@ export class OriginsDaoService {
       $push: { missions: missionId },
     });
     return skipster;
+  }
+
+  async pushMissionIdInsideSkippy(
+    skippyId: string,
+    missionId: ObjectId,
+  ): Promise<any> {
+    const skippy = await this.skippyModel.findByIdAndUpdate(skippyId, {
+      $push: { missions: missionId },
+    });
+    return skippy;
+  }
+
+  async pushMissionIdInsideSkip(
+    skipId: string,
+    missionId: ObjectId,
+  ): Promise<any> {
+    const skip = await this.skipModel.findByIdAndUpdate(skipId, {
+      $push: { missions: missionId },
+    });
+    return skip;
   }
 
   async removeMissionIdInsideSkipster(

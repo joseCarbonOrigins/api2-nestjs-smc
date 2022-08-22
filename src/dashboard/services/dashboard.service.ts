@@ -16,6 +16,8 @@ import { LambdaService } from '../../external/services/lambda.service';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
+import { SkippyModidyDto } from '../dto/skippy.dto';
+// schemas
 import { Skip } from '../../database/schemas/skip.schema';
 
 const monthNames = [
@@ -178,6 +180,14 @@ export class DashboardService {
   async forceFinishMissions(body: MissionQueryDto): Promise<any> {
     try {
       const { mission_id } = body;
+      //  call lambda function
+      const lambdaPayload = {
+        case: 'complete_mission',
+        mission: {
+          id: mission_id,
+        },
+      };
+      this.lambdaService.invokeLambda(lambdaPayload);
 
       const finishedMission = await this.missionModel
         .findByIdAndUpdate(mission_id, {
@@ -191,15 +201,6 @@ export class DashboardService {
       if (!finishedMission) {
         throw new NotFoundException('Could not find mission');
       }
-
-      //  call lambda function
-      const lambdaPayload = {
-        case: 'complete_mission',
-        mission: {
-          id: mission_id,
-        },
-      };
-      this.lambdaService.invokeLambda(lambdaPayload);
 
       const previousMission = await this.missionModel.findOneAndUpdate(
         {
@@ -229,6 +230,7 @@ export class DashboardService {
 
       return { message: 'mission finished' };
     } catch (e) {
+      console.log('Error finishing the mission: ', e);
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -440,6 +442,20 @@ export class DashboardService {
       console.log(e);
       throw new NotFoundException(
         "getSkipsterMissions - Couldn't get skipster's missions",
+      );
+    }
+  }
+
+  async modidySkippy(skippyemail: string, body: SkippyModidyDto): Promise<any> {
+    try {
+      const skippy = await this.skippyModel
+        .findOneAndUpdate({ email: skippyemail }, body)
+        .select('name email current_skip ip_address');
+      return skippy;
+    } catch (error) {
+      console.log('error modifying skippys information');
+      throw new InternalServerErrorException(
+        'Could not modify skippy information',
       );
     }
   }

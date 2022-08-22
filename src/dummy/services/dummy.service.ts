@@ -5,8 +5,6 @@ import { Model } from 'mongoose';
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
 import { Skip } from '../../database/schemas/skip.schema';
-// aws
-import { LambdaService } from '../../external/services/lambda.service';
 
 @Injectable()
 export class DummyService {
@@ -14,7 +12,6 @@ export class DummyService {
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
-    private lambdaService: LambdaService,
   ) {}
 
   async createDummyMissions(payload: any): Promise<any> {
@@ -160,32 +157,32 @@ export class DummyService {
         await newMission3.save();
       }
 
-      const missions = await this.missionModel
-        .find({
-          mission_completed: false,
-          previous_mission_completed: true,
-          skipster_id: null,
-        })
-        .select(
-          '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
-        )
-        .populate({
-          path: 'skip_id',
-          select: 'skippy_id -_id',
-          populate: {
-            path: 'skippy_id',
-            select: 'name email -_id',
-          },
-        });
+      // const missions = await this.missionModel
+      //   .find({
+      //     mission_completed: false,
+      //     previous_mission_completed: true,
+      //     skipster_id: null,
+      //   })
+      //   .select(
+      //     '_id mission_name mission_xp mission_coins estimated_time start_point ending_point start_address_name ending_address_name mock',
+      //   )
+      //   .populate({
+      //     path: 'skip_id',
+      //     select: 'skippy_id -_id',
+      //     populate: {
+      //       path: 'skippy_id',
+      //       select: 'name email -_id',
+      //     },
+      //   });
 
-      const lambdaPayload = {
-        case: 'new_mission',
-        data: missions.length === 0 ? false : true,
-        missions: missions,
-      };
+      // const lambdaPayload = {
+      //   case: 'new_mission',
+      //   data: missions.length === 0 ? false : true,
+      //   missions: missions,
+      // };
 
       // excecute lambda function
-      this.lambdaService.invokeLambda(lambdaPayload);
+      // this.lambdaService.invokeLambda(lambdaPayload);
 
       return { message: 'missions created', success: true };
     } catch (error) {
