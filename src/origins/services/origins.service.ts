@@ -732,6 +732,17 @@ export class OriginsService {
     }
   }
 
+  async getAllSkippies(): Promise<any> {
+    try {
+      const Skippies = await this.skippyModel
+      .find({})
+      .select('-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel');
+      return Skippies;
+    } catch (error) {
+      throw new NotFoundException('getAllSkippies - Couldnt return skippy data');
+    }
+  }
+
   async testSMS(payload: any): Promise<any> {
     try {
       const { customerPhone, customerName } = payload;

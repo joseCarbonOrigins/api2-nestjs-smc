@@ -121,7 +121,7 @@ export class OriginsController {
     return this.originsService.declineMission(payload);
   }
 
-  @ApiOperation({ summary: 'Get skippys data' })
+  @ApiOperation({ summary: 'Get skippy data' })
   @Get('skippy/:skippyname')
   @Header('Access-Control-Allow-Origin', '*')
   getSkippyData(@Param('skippyname') skippyname: string) {
@@ -138,11 +138,17 @@ export class OriginsController {
     return this.originsService.setSkippyCameras(skippyname, arrange);
   }
 
+  @ApiOperation({ summary: 'Get all skippies data' })
+  @Get('skippy')
+  @Header('Access-Control-Allow-Origin', '*')
+  getAllSkippies() {
+    return this.originsService.getAllSkippies();
+  }
+
   @ApiOperation({ summary: 'Receive skippys orders' })
   @Post('sms')
   @Header('Access-Control-Allow-Origin', '*')
   testSMS(@Body() payload: any) {
     return this.originsService.testSMS(payload);
   }
-
 }

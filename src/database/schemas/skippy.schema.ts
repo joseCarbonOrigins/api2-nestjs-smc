@@ -40,14 +40,17 @@ export class Skippy extends Document {
   @Prop({ ref: 'Mission', default: [] })
   missions: [Types.ObjectId];
 
-  @Prop({ required: true, default: [1, 2, 3, 4, 5] })
+  @Prop({ required: true, default: [1, 2, 3, 4] })
   cameras_arrangement: number[];
 
   @Prop({ required: false })
   short_id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: '192.68.0.1' })
   ip_address: string;
+
+  @Prop({ required: true, default: 'skippy-' })
+  agora_channel: string;
 }
 
 export const SkippySchema = SchemaFactory.createForClass(Skippy);
