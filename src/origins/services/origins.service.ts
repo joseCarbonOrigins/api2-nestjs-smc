@@ -697,12 +697,13 @@ export class OriginsService {
         .where({
           email: skippyname,
         })
-        .select('name email ip_address cameras_arrangement');
-      const response = (({ name, email, ip_address, cameras_arrangement }) => ({
+        .select('name email ip_address cameras_arrangement agora_channel');
+      const response = (({ name, email, ip_address, cameras_arrangement, agora_channel }) => ({
         name,
         email,
         ip_address,
         cameras_arrangement,
+        agora_channel,
       }))(theSkippy[0]);
       return response;
     } catch (error) {
