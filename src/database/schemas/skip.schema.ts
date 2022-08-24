@@ -82,6 +82,9 @@ export class Skip extends Document {
 
   @Prop({ ref: 'Mission', default: [] })
   missions: [Types.ObjectId];
+
+  @Prop()
+  unlock_code: number;
 }
 
 export const SkipSchema = SchemaFactory.createForClass(Skip);
