@@ -9,6 +9,7 @@ import { Skip, SkipSchema } from './schemas/skip.schema';
 import { Skipster, SkipsterSchema } from './schemas/skipster.schema';
 import { Log, LogSchema } from './schemas/log.schema';
 import { Mission, MissionSchema } from './schemas/mission.schema';
+import { Restaurant, RestaurantSchema } from './schemas/restaurant.schema';
 
 @Global()
 @Module({
@@ -34,6 +35,10 @@ import { Mission, MissionSchema } from './schemas/mission.schema';
         name: Mission.name,
         schema: MissionSchema,
       },
+      {
+        name: Restaurant.name,
+        schema: RestaurantSchema,
+      }
     ]),
     MongooseModule.forRootAsync({
       useFactory: async (configService: ConfigType<typeof config>) => ({
