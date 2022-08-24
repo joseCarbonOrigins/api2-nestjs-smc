@@ -7,4 +7,9 @@ export class FunctionsService {
     const difference = moment(timeB).diff(moment(timeA), 'milliseconds');
     return difference;
   }
+
+  generateRandomUnlockCode(): number {
+    const pincode = Math.floor(1000 + Math.random() * 9000);
+    return pincode;
+  }
 }

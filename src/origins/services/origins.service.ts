@@ -460,21 +460,24 @@ export class OriginsService {
             },
           );
           // update on skip -> order_info status
-          await this.originsData.updateSkipById(skippy.current_skip_id, {
-            $set: { 'order_info.status': status },
-          });
+          const skip = await this.originsData.updateSkipById(
+            skippy.current_skip_id,
+            {
+              $set: { 'order_info.status': status },
+            },
+          );
 
           // send sms notification to customer
           this.twilio.sendSMS(
             customerPhone,
-            `Hello ${customerName}. Your order is at your door. The pin code for the robot is 1122`,
+            `Hello ${customerName}. Your order is at your door. The pin code for the robot is ${skip.unlock_code}`,
           );
 
           // send locking mechanism payload to skippy
           await this.lockingService.sendLockingPayload(
             skippyname,
             'arrived_customer',
-            1122,
+            skip.unlock_code,
             `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
           );
           break;
@@ -736,11 +739,15 @@ export class OriginsService {
   async getAllSkippies(): Promise<any> {
     try {
       const Skippies = await this.skippyModel
-      .find({})
-      .select('-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel');
+        .find({})
+        .select(
+          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel',
+        );
       return Skippies;
     } catch (error) {
-      throw new NotFoundException('getAllSkippies - Couldnt return skippy data');
+      throw new NotFoundException(
+        'getAllSkippies - Couldnt return skippy data',
+      );
     }
   }
 

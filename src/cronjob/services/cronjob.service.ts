@@ -9,6 +9,8 @@ import { Cronjob } from '../dtos/cronjob.dto';
 import { Skippy } from '../../database/schemas/skippy.schema';
 import { Skip } from '../../database/schemas/skip.schema';
 import { Mission } from '../../database/schemas/mission.schema';
+// functions
+import { FunctionsService } from '../../external/services/functions.service';
 @Injectable()
 export class CronjobService {
   constructor(
@@ -16,6 +18,7 @@ export class CronjobService {
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     private lambdaService: LambdaService,
+    private functionService: FunctionsService,
   ) {}
 
   async pushSkippysOrders(payload: Cronjob): Promise<any> {
@@ -81,12 +84,15 @@ export class CronjobService {
       customer: order.customer,
       restaurant: order.restaurant,
     };
+    // create unlock code for this mission
+    const pincode = this.functionService.generateRandomUnlockCode();
     // create new skip for skippy
     const newSkip = new this.skipModel({
       startTime: today,
       skippy_id: isSkippyNotBusy._id,
       order_info: oderInfo,
       mock: false,
+      unlock_code: pincode,
     });
     await newSkip.save();
     // update skippy with current skip
