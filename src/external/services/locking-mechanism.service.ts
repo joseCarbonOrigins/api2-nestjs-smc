@@ -7,14 +7,13 @@ export class LockingMechanismService {
   constructor(private http: HttpService) {}
 
   async sendLockingPayload(
-    skippyEmail: string,
+    skippyIpAddress: string,
     skippyStatus: string,
     password: number,
     customerName: string,
   ) {
     const obj = {
-      skippy: skippyEmail.split('@')[0],
-      // skippy: 'sol',
+      skippy_ip_address: skippyIpAddress,
       skippy_status: skippyStatus,
       password,
       customer: customerName,

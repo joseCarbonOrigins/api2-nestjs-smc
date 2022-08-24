@@ -99,7 +99,7 @@ export class OriginsService {
       if (missionPicked.mission_name === 'Driving to merchant') {
         // send locking mechanism payload to skippy
         await this.lockingService.sendLockingPayload(
-          missionPicked.skip_id.skippy_id.email,
+          missionPicked.skip_id.skippy_id.ip_address,
           'driving_merchant',
           1234,
           `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
@@ -110,7 +110,7 @@ export class OriginsService {
       if (missionPicked.mission_name === 'Driving to customer') {
         // send locking mechanism payload to skippy
         await this.lockingService.sendLockingPayload(
-          missionPicked.skip_id.skippy_id.email,
+          missionPicked.skip_id.skippy_id.ip_address,
           'driving_customer',
           1234,
           `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
@@ -130,7 +130,7 @@ export class OriginsService {
       };
     } catch (error) {
       console.log('PICK MISSION ERROR', error);
-      throw new NotFoundException('Mission not picked');
+      throw new InternalServerErrorException('Mission not picked');
     }
   }
 
@@ -175,7 +175,7 @@ export class OriginsService {
 
       return responseData;
     } catch (error) {
-      throw new NotFoundException('Error getting skippy order');
+      throw new InternalServerErrorException('Error getting skippy order');
     }
   }
 
@@ -225,7 +225,7 @@ export class OriginsService {
 
       return { message: 'mission1 ended' };
     } catch (e) {
-      throw new NotFoundException('Error updating order status');
+      throw new InternalServerErrorException('Error updating order status');
     }
   }
 
@@ -263,7 +263,7 @@ export class OriginsService {
 
       // send locking mechanism payload to skippy
       await this.lockingService.sendLockingPayload(
-        endedMission.skip_id.skippy_id.email,
+        endedMission.skip_id.skippy_id.ip_address,
         'arrived_customer',
         1234,
         `${endedMission.skip_id.order_info.customer.firstName} ${endedMission.skip_id.order_info.customer.lastName}`,
@@ -293,7 +293,7 @@ export class OriginsService {
       return { message: 'mission2 ended' };
     } catch (e) {
       console.log('END MISSION 2 ERROR ', e);
-      throw new NotFoundException('Error updating order status');
+      throw new InternalServerErrorException('Error updating order status');
     }
   }
 
@@ -344,7 +344,7 @@ export class OriginsService {
 
       return { message: 'mission3 ended' };
     } catch (e) {
-      throw new NotFoundException('Error updating order status');
+      throw new InternalServerErrorException('Error ending mission3');
     }
   }
 
@@ -396,7 +396,7 @@ export class OriginsService {
 
           // send locking mechanism payload to skippy
           await this.lockingService.sendLockingPayload(
-            skippyname,
+            skippy.ip_address,
             'arrived_merchant',
             1234,
             `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
@@ -475,7 +475,7 @@ export class OriginsService {
 
           // send locking mechanism payload to skippy
           await this.lockingService.sendLockingPayload(
-            skippyname,
+            skippy.ip_address,
             'arrived_customer',
             skip.unlock_code,
             `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
@@ -488,7 +488,7 @@ export class OriginsService {
       return { message: 'updated' };
     } catch (error) {
       console.log('Error updating order status', error);
-      throw new NotFoundException('Error updating order status');
+      throw new InternalServerErrorException('Error updating order status');
     }
   }
 
@@ -578,7 +578,7 @@ export class OriginsService {
 
       return { message: 'mission unassigned' };
     } catch (error) {
-      throw new NotFoundException('Error updating order status');
+      throw new InternalServerErrorException('Error unassigning order');
     }
   }
 
@@ -647,7 +647,7 @@ export class OriginsService {
           );
           // send locking mechanism payload to skippy
           await this.lockingService.sendLockingPayload(
-            missionPicked.skip_id.skippy_id.email,
+            missionPicked.skip_id.skippy_id.ip_address,
             'driving_customer',
             1122,
             `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
@@ -670,7 +670,7 @@ export class OriginsService {
       return { message: 'mission accepted', mission: missionPicked };
     } catch (error) {
       console.log('error accepting the mission ', error);
-      throw new NotFoundException('Error accepting the mission');
+      throw new InternalServerErrorException('Error accepting the mission');
     }
   }
 
@@ -689,7 +689,7 @@ export class OriginsService {
       this.lambdaService.invokeLambda(lambdaPayload);
       return { message: 'mission declined' };
     } catch (error) {
-      throw new NotFoundException('Error declining the mission');
+      throw new InternalServerErrorException('Error declining the mission');
     }
   }
 
@@ -715,7 +715,9 @@ export class OriginsService {
       }))(theSkippy[0]);
       return response;
     } catch (error) {
-      throw new NotFoundException('getSkippyData - Couldnt return skippy data');
+      throw new InternalServerErrorException(
+        'getSkippyData - Couldnt return skippy data',
+      );
     }
   }
 
@@ -735,7 +737,7 @@ export class OriginsService {
       Object.assign(response, { cameras_arrangement: arrange.cameras });
       return response;
     } catch (error) {
-      throw new NotFoundException(
+      throw new InternalServerErrorException(
         'setSkippyCameras - Couldnt change cameras arrangement',
       );
     }
@@ -750,7 +752,7 @@ export class OriginsService {
         );
       return Skippies;
     } catch (error) {
-      throw new NotFoundException(
+      throw new InternalServerErrorException(
         'getAllSkippies - Couldnt return skippy data',
       );
     }
@@ -766,7 +768,9 @@ export class OriginsService {
       return { message: 'message sent' };
     } catch (error) {
       console.error('error sending sms text...', error);
-      throw new NotFoundException('Error sending sms text notification');
+      throw new InternalServerErrorException(
+        'Error sending sms text notification',
+      );
     }
   }
 }

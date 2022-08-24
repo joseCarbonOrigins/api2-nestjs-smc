@@ -78,7 +78,7 @@ export class OriginsDaoService {
         select: 'skippy_id order_info',
         populate: {
           path: 'skippy_id',
-          select: 'name email',
+          select: 'name email ip_address',
         },
       });
     return missionUpdated;
@@ -95,7 +95,7 @@ export class OriginsDaoService {
         select: 'skippy_id order_info',
         populate: {
           path: 'skippy_id',
-          select: 'name email',
+          select: 'name email ip_address',
         },
       });
     return mission;
