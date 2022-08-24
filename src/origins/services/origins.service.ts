@@ -638,20 +638,19 @@ export class OriginsService {
 
       // STARTING MISSION 2
       if (missionPicked.mission_name === 'Driving to customer') {
-        // send locking mechanism payload to skippy
-        await this.lockingService.sendLockingPayload(
-          missionPicked.skip_id.skippy_id.email,
-          'driving_customer',
-          1122,
-          `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
-        );
-
         // update order status based on mission picked up
         if (!missionPicked.mock) {
           await this.dl.updateOrderStatus(
             missionPicked.skip_id.skippy_id.email,
             missionPicked.skip_id.order_info.order_id,
             'ENROUTE',
+          );
+          // send locking mechanism payload to skippy
+          await this.lockingService.sendLockingPayload(
+            missionPicked.skip_id.skippy_id.email,
+            'driving_customer',
+            1122,
+            `${missionPicked.skip_id.order_info.customer.firstName} ${missionPicked.skip_id.order_info.customer.lastName}`,
           );
         }
       }
@@ -701,7 +700,13 @@ export class OriginsService {
           email: skippyname,
         })
         .select('name email ip_address cameras_arrangement agora_channel');
-      const response = (({ name, email, ip_address, cameras_arrangement, agora_channel }) => ({
+      const response = (({
+        name,
+        email,
+        ip_address,
+        cameras_arrangement,
+        agora_channel,
+      }) => ({
         name,
         email,
         ip_address,
