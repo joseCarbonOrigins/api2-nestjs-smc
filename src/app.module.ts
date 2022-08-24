@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { OriginsModule } from './origins/origins.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DatabaseModule } from './database/database.module';
+import { OthersModule } from './others/others.module';
 
 import { environments } from './environments';
 import { ExternalModule } from './external/external.module';
 import { CronjobModule } from './cronjob/cronjob.module';
 import { DummyModule } from './dummy/dummy.module';
+
 import config from './config';
 
 @Module({
@@ -31,8 +31,7 @@ import config from './config';
     ExternalModule,
     CronjobModule,
     DummyModule,
+    OthersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
