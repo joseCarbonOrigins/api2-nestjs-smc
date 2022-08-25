@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Header, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Patch, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { OthersService } from '../services/others.service';
 //dtos
 import { RestaurantDto } from '../dtos/restaurants.dto';
+import path from 'path';
 
 @ApiTags('Others')
 @Controller('others')
@@ -21,5 +22,19 @@ export class OthersController {
   @Header('Access-Control-Allow-Origin', '*')
   addRestaurants(@Body() body: RestaurantDto) {
     return this.othersService.addRestaurants(body);
+  }
+
+  @ApiOperation({ summary: `Update restaurant` })
+  @Patch('restaurant')
+  @Header('Access-Control-Allow-Origin', '*')
+  updateRestaurant(@Body() body: RestaurantDto) {
+    return this.othersService.updateRestaurant(body);
+  }
+
+  @ApiOperation({ summary: `Delete restaurant` })
+  @Delete('restaurant')
+  @Header('Access-Control-Allow-Origin', '*')
+  deleteRestaurant(@Body() body: RestaurantDto) {
+    return this.othersService.deleteRestaurant(body);
   }
 }
