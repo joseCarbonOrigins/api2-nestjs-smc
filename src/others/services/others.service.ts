@@ -13,7 +13,7 @@ export class OthersService {
   //Get all restaurants
   async getRestaurants(): Promise<Restaurant[]> {
     try {
-      return await this.restaurantModel.find();
+      return await this.restaurantModel.find().sort({ rid: 1 });
     } catch (error) {
       console.log('getRestaurants error: ', error);
       throw new InternalServerErrorException(
