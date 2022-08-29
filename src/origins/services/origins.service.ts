@@ -356,24 +356,14 @@ export class OriginsService {
         type: 'Point',
         coordinates: [location.lat, location.long],
       };
-      // const dlUpdateOrderStatus = await this.dl.updateOrderStatus(
-      //   skippyname,
-      //   orderid,
-      //   status,
-      // );
-
-      // const updateStatusJson = dlUpdateOrderStatus.data;
       const skippy = await this.originsData.getSkippyByEmail(skippyname);
 
-      const dlGetOrder = await this.dl.getAnOrder(skippyname, orderid);
-      const getOrderInfo = dlGetOrder.data;
-      const dlGetDriver = await this.dl.getDriverInfo(skippyname);
-      const getDriverInfo = dlGetDriver.data;
-
-      // const restaurantPhone = `+1${getOrderInfo.restaurant[0].PHONE}`;
-      const customerPhone = `+1${getOrderInfo.user.PHONE}`;
-      const customerName = `${getOrderInfo.user.FNAME}`;
-      const skippyColor = `${getDriverInfo.lname}`;
+      const skipInfo = await this.originsData.getSkipById(
+        skippy.current_skip_id,
+      );
+      const customerPhone = `${skipInfo.order_info.customer.phone}`;
+      const customerName = `${skipInfo.order_info.customer.firstName} ${skipInfo.order_info.customer.lastName}`;
+      const skippyName = skippy.name;
 
       switch (status) {
         case 'ARRIVED':
@@ -386,8 +376,10 @@ export class OriginsService {
             },
           );
 
-          // update on DL
-          await this.dl.updateOrderStatus(skippyname, orderid, status);
+          if (!skipInfo.mock) {
+            // update on DL
+            await this.dl.updateOrderStatus(skippyname, orderid, status);
+          }
 
           // update on skip -> order_info status
           await this.originsData.updateSkipById(skippy.current_skip_id, {
@@ -399,7 +391,7 @@ export class OriginsService {
             skippy.ip_address,
             'arrived_merchant',
             1234,
-            `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
+            customerName,
           );
 
           // if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
@@ -411,7 +403,7 @@ export class OriginsService {
 
           this.twilio.sendSMS(
             customerPhone,
-            `Hello ${customerName}. Skippy is at your restaurant`,
+            `Hello ${customerName}. Skippy is at the restaurant waiting for your food !!!`,
           );
           break;
         case 'ENROUTE':
@@ -424,12 +416,14 @@ export class OriginsService {
             },
           );
 
-          // update on DL
-          await this.dl.updateOrderStatus(skippyname, orderid, status);
+          if (!skipInfo.mock) {
+            // update on DL
+            await this.dl.updateOrderStatus(skippyname, orderid, status);
+          }
 
           this.twilio.sendSMS(
             customerPhone,
-            `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
+            `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyName}`,
           );
 
           break;
@@ -442,11 +436,6 @@ export class OriginsService {
               location: newLocation,
             },
           );
-
-          // this.twilio.sendSMS(
-          //   customerPhone,
-          //   `Hello ${customerName}. Your order is at your door. The pin code for the robot is 1122`,
-          // );
 
           break;
 
@@ -478,7 +467,7 @@ export class OriginsService {
             skippy.ip_address,
             'arrived_customer',
             skip.unlock_code,
-            `${getOrderInfo.user.FNAME} ${getOrderInfo.user.LNAME}`,
+            customerName,
           );
           break;
 
@@ -492,63 +481,63 @@ export class OriginsService {
     }
   }
 
-  async oldUpdateOrderStatus(
-    skippyname: string,
-    orderid: number,
-    status: string,
-  ) {
-    try {
-      const updatedStatus = await this.dl.updateOrderStatus(
-        skippyname,
-        orderid,
-        status,
-      );
-      const updateStatusJson = updatedStatus.data;
+  // async oldUpdateOrderStatus(
+  //   skippyname: string,
+  //   orderid: number,
+  //   status: string,
+  // ) {
+  //   try {
+  //     const updatedStatus = await this.dl.updateOrderStatus(
+  //       skippyname,
+  //       orderid,
+  //       status,
+  //     );
+  //     const updateStatusJson = updatedStatus.data;
 
-      const getOrder = await this.dl.getAnOrder(skippyname, orderid);
-      const getOrderInfo = getOrder.data;
+  //     const getOrder = await this.dl.getAnOrder(skippyname, orderid);
+  //     const getOrderInfo = getOrder.data;
 
-      const getDriver = await this.dl.getDriverInfo(skippyname);
-      const getDriverInfo = getDriver.data;
+  //     const getDriver = await this.dl.getDriverInfo(skippyname);
+  //     const getDriverInfo = getDriver.data;
 
-      const restaurantPhone = `+1${getOrderInfo.restaurant[0].PHONE}`;
-      const customerPhone = `+1${getOrderInfo.user.PHONE}`;
-      const customerName = `${getOrderInfo.user.FNAME}`;
-      const skippyColor = `${getDriverInfo.lname}`;
+  //     const restaurantPhone = `+1${getOrderInfo.restaurant[0].PHONE}`;
+  //     const customerPhone = `+1${getOrderInfo.user.PHONE}`;
+  //     const customerName = `${getOrderInfo.user.FNAME}`;
+  //     const skippyColor = `${getDriverInfo.lname}`;
 
-      switch (status) {
-        case 'ARRIVED':
-          if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
-            this.twilio.makeACall(
-              restaurantPhone,
-              'Hello. Skippy. is at your restaurant',
-            );
-          }
-          this.twilio.sendSMS(
-            customerPhone,
-            `Hello ${customerName}. Skippy arrived to the restaurant.`,
-          );
-          break;
-        case 'ENROUTE':
-          this.twilio.sendSMS(
-            customerPhone,
-            `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
-          );
-          break;
-        case 'DELIVERED':
-          this.twilio.sendSMS(
-            customerPhone,
-            `Hello ${customerName}. Your order is at your door. The color of your Skippy is ${skippyColor} :)`,
-          );
-          break;
-        default:
-      }
+  //     switch (status) {
+  //       case 'ARRIVED':
+  //         if (getDriverInfo.restaurant[0].NAME !== 'Element Pizza') {
+  //           this.twilio.makeACall(
+  //             restaurantPhone,
+  //             'Hello. Skippy. is at your restaurant',
+  //           );
+  //         }
+  //         this.twilio.sendSMS(
+  //           customerPhone,
+  //           `Hello ${customerName}. Skippy arrived to the restaurant.`,
+  //         );
+  //         break;
+  //       case 'ENROUTE':
+  //         this.twilio.sendSMS(
+  //           customerPhone,
+  //           `Hello ${customerName}. Your order is on its way to your house. The color of your Skippy is ${skippyColor}`,
+  //         );
+  //         break;
+  //       case 'DELIVERED':
+  //         this.twilio.sendSMS(
+  //           customerPhone,
+  //           `Hello ${customerName}. Your order is at your door. The color of your Skippy is ${skippyColor} :)`,
+  //         );
+  //         break;
+  //       default:
+  //     }
 
-      return updateStatusJson;
-    } catch (e) {
-      throw new NotFoundException('Error updating order status');
-    }
-  }
+  //     return updateStatusJson;
+  //   } catch (e) {
+  //     throw new NotFoundException('Error updating order status');
+  //   }
+  // }
 
   async unassignMission(payload: UpdateMissionStatus): Promise<any> {
     // disengage from mission
@@ -638,6 +627,10 @@ export class OriginsService {
 
       // STARTING MISSION 2
       if (missionPicked.mission_name === 'Driving to customer') {
+        this.twilio.sendSMS(
+          missionPicked.skip_id.order_info.customer.phone,
+          `Hello ${missionPicked.skip_id.order_info.customer.firstName}. Your order is on its way to your house.`,
+        );
         // update order status based on mission picked up
         if (!missionPicked.mock) {
           await this.dl.updateOrderStatus(
