@@ -53,20 +53,20 @@ export class OriginsController {
     return this.originsService.getSkippyOrder(skippyname);
   }
 
-  @ApiOperation({ summary: 'Old endpoint: update order status' })
-  @Put('skippy/:skippyname/:orderid/:status')
-  @Header('Access-Control-Allow-Origin', '*')
-  oldUpdateOrderStatus(
-    @Param('skippyname') skippyname: string,
-    @Param('orderid') orderid: number,
-    @Param('status') status: string,
-  ) {
-    return this.originsService.oldUpdateOrderStatus(
-      skippyname,
-      orderid,
-      status,
-    );
-  }
+  // @ApiOperation({ summary: 'Old endpoint: update order status' })
+  // @Put('skippy/:skippyname/:orderid/:status')
+  // @Header('Access-Control-Allow-Origin', '*')
+  // oldUpdateOrderStatus(
+  //   @Param('skippyname') skippyname: string,
+  //   @Param('orderid') orderid: number,
+  //   @Param('status') status: string,
+  // ) {
+  //   return this.originsService.oldUpdateOrderStatus(
+  //     skippyname,
+  //     orderid,
+  //     status,
+  //   );
+  // }
 
   // end mission1
   @ApiOperation({
