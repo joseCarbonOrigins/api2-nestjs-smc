@@ -39,6 +39,10 @@ export class Skip extends Document {
         zip: {
           type: String,
         },
+        phone: {
+          type: String,
+          required: true,
+        },
       },
       restaurant: {
         name: {

@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
 import { Skip } from '../../database/schemas/skip.schema';
+import { FunctionsService } from '../../external/services/functions.service';
 
 @Injectable()
 export class DummyService {
@@ -12,6 +13,7 @@ export class DummyService {
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
+    private functionService: FunctionsService,
   ) {}
 
   async createDummyMissions(payload: any): Promise<any> {
@@ -36,6 +38,7 @@ export class DummyService {
             long: customerInfo.long,
             address: customerInfo.address,
             zip: 55413,
+            phone: customerInfo.phone,
           },
           restaurant: {
             name: restaurantInfo.name,
@@ -46,11 +49,15 @@ export class DummyService {
           },
         };
 
+        // create random unlock_code
+        const pinCode = this.functionService.generateRandomUnlockCode();
+
         const newSkip = new this.skipModel({
           startTime: today,
           skippy_id: skippy._id,
           order_info: orderInfo,
           mock: true,
+          unlock_code: pinCode,
         });
         await newSkip.save();
 
