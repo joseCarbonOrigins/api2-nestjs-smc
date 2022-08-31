@@ -31,7 +31,7 @@ export class Restaurant extends Document {
   state: string;
 
   @Prop({ required: true })
-  zip: number;
+  zip: string;
 
   @Prop({ required: true })
   phone: string;

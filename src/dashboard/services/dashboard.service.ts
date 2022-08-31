@@ -363,6 +363,11 @@ export class DashboardService {
           for (let j = 0; j < initialDate.getMonth(); j++) {
             delete earnings[i][monthNames[j]];
           }
+          if (i === endingDate.getFullYear()) {
+            for (let j = endingDate.getMonth() + 1; j < 12; j++) {
+              delete earnings[i][monthNames[j]];
+            }
+          }
         } else if (i === endingDate.getFullYear()) {
           for (let j = endingDate.getMonth() + 1; j < 12; j++) {
             delete earnings[i][monthNames[j]];
