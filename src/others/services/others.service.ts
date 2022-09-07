@@ -45,12 +45,10 @@ export class OthersService {
     }
   }
 
-  //Delete restaurant
-  async deleteRestaurant(restaurant: any): Promise<Restaurant> {
+  //Delete restaurant by rid
+  async deleteRestaurant(rid: number): Promise<Restaurant> {
     try {
-      return await this.restaurantModel.findOneAndDelete({
-        rid: restaurant.rid,
-      });
+      return await this.restaurantModel.findOneAndDelete({ rid });
     } catch (error) {
       console.log('deleteRestaurant error: ', error);
       throw new InternalServerErrorException('Could not delete restaurant');

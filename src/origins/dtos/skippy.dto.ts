@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CamerasArrangementDto {
   @IsNotEmpty()
   @ApiProperty()
+  @IsNumber({}, { each: true })
   readonly cameras: number[];
 }
