@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Header, Patch, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Header,
+  Param,
+  Patch,
+  Put,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { OthersService } from '../services/others.service';
 //dtos
@@ -32,9 +41,9 @@ export class OthersController {
   }
 
   @ApiOperation({ summary: `Delete restaurant` })
-  @Delete('restaurant')
+  @Delete('restaurant/:rid')
   @Header('Access-Control-Allow-Origin', '*')
-  deleteRestaurant(@Body() body: RestaurantDto) {
-    return this.othersService.deleteRestaurant(body);
+  deleteRestaurant(@Param('rid') rid: number) {
+    return this.othersService.deleteRestaurant(rid);
   }
 }

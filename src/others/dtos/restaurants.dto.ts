@@ -138,7 +138,7 @@ export class RestaurantDto {
 
   @ApiProperty({
     description: 'Restaurant unlock code',
-    required: true,
+    required: false,
     type: Number,
     default: 2022,
   })
