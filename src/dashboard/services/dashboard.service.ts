@@ -20,6 +20,7 @@ import { SkippyModidyDto } from '../dto/skippy.dto';
 // schemas
 import { Skip } from '../../database/schemas/skip.schema';
 
+
 const monthNames = [
   'January',
   'February',
@@ -467,18 +468,10 @@ export class DashboardService {
 
   // async testingSantiago(): Promise<any> {
   //   try {
-  //     const misiones = await this.missionModel
-  //       .find({})
-  //       .select('_id name mission_completed mock skipster_id')
-  //       .sort({ _id: 'desc' });
-  //     let resultado = 0;
-  //     const respuesta = misiones.forEach((mission) => {
-  //       if ((mission as any).skipster_id === '62b204e9dbce1ef4676a8c96') {
-  //         resultado += 1;
-  //       }
-  //       return { resultado: resultado };
-  //     });
-  //     return resultado;
+  //     return this.getDistance(
+  //       '45.0006638,-93.2700000',
+  //       '44.0006621,-92.2700000',
+  //     );
   //   } catch (e) {
   //     console.log(e);
   //     throw new NotFoundException(e);

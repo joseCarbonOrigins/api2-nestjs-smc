@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 // AWS
@@ -11,6 +15,7 @@ import { Skip } from '../../database/schemas/skip.schema';
 import { Mission } from '../../database/schemas/mission.schema';
 // functions
 import { FunctionsService } from '../../external/services/functions.service';
+import axios from 'axios';
 @Injectable()
 export class CronjobService {
   constructor(
@@ -20,6 +25,23 @@ export class CronjobService {
     private lambdaService: LambdaService,
     private functionService: FunctionsService,
   ) {}
+
+  async getDistanceAndDuration(
+    origin: string,
+    destination: string,
+  ): Promise<any> {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&key=AIzaSyDqsHfaQSEmbhgmmjMXFMLp0xRSyWRAuQE`;
+      const response = await axios.get(url);
+      const distance = response.data.routes[0].legs[0].distance.value;
+      const duration = response.data.routes[0].legs[0].duration.value;
+      return { distance, duration };
+    } catch (e) {
+      throw new NotFoundException(
+        "getDistance - Couldn't get distance between two points",
+      );
+    }
+  }
 
   async pushSkippysOrders(payload: Cronjob): Promise<any> {
     try {
@@ -114,8 +136,10 @@ export class CronjobService {
       // dummy values
       mission_xp: 15,
       mission_coins: 15,
-      estimated_time: 900,
-
+      estimated_time: this.getDistanceAndDuration(
+        `${isSkippyNotBusy.location.coordinates[0]},${isSkippyNotBusy.location.coordinates[1]}`,
+        `${order.restaurant.lat},${order.restaurant.long}`,
+      ),
       mission_completed: false,
       previous_mission_completed: true,
       previous_mission_id: null,
@@ -142,7 +166,10 @@ export class CronjobService {
       // dummy values
       mission_xp: 15,
       mission_coins: 15,
-      estimated_time: 900,
+      estimated_time: this.getDistanceAndDuration(
+        `${isSkippyNotBusy.location.coordinates[0]},${isSkippyNotBusy.location.coordinates[1]}`,
+        `${order.restaurant.lat},${order.restaurant.long}`,
+      ),
 
       mission_completed: false,
       previous_mission_completed: false,
@@ -170,7 +197,10 @@ export class CronjobService {
       // dummy values
       mission_xp: 15,
       mission_coins: 15,
-      estimated_time: 900,
+      estimated_time: this.getDistanceAndDuration(
+        `${isSkippyNotBusy.location.coordinates[0]},${isSkippyNotBusy.location.coordinates[1]}`,
+        `${order.restaurant.lat},${order.restaurant.long}`,
+      ),
 
       mission_completed: false,
       previous_mission_completed: false,

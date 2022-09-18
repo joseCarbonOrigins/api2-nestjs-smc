@@ -80,10 +80,10 @@ export class DashboardController {
     return this.dashboardService.modidySkippy(skippyemail, body);
   }
 
-  // @ApiOperation({ summary: `testingSantiago` })
-  // @Get('testingSantiago')
-  // @Header('Access-Control-Allow-Origin', '*')
-  // testingSantiago() {
-  //   return this.dashboardService.testingSantiago();
-  // }
+  @ApiOperation({ summary: `Modify skippy's information` })
+  @Get('testingSantiago')
+  @Header('Access-Control-Allow-Origin', '*')
+  testingSantiago() {
+    return this.dashboardService.testingSantiago();
+  }
 }
