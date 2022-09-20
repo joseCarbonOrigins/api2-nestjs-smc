@@ -51,6 +51,9 @@ export class Skippy extends Document {
 
   @Prop({ required: true, default: 'skippy-' })
   agora_channel: string;
+
+  @Prop({ required: true, default: '000.000.0000' })
+  phone_number: string;
 }
 
 export const SkippySchema = SchemaFactory.createForClass(Skippy);
