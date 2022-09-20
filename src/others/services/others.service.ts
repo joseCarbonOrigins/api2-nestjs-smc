@@ -13,7 +13,7 @@ export class OthersService {
   //Get all restaurants
   async getRestaurants(): Promise<Restaurant[]> {
     try {
-      return await this.restaurantModel.find();
+      return await this.restaurantModel.find().sort({ rid: 1 });
     } catch (error) {
       console.log('getRestaurants error: ', error);
       throw new InternalServerErrorException(
@@ -45,12 +45,10 @@ export class OthersService {
     }
   }
 
-  //Delete restaurant
-  async deleteRestaurant(restaurant: any): Promise<Restaurant> {
+  //Delete restaurant by rid
+  async deleteRestaurant(rid: number): Promise<Restaurant> {
     try {
-      return await this.restaurantModel.findOneAndDelete({
-        rid: restaurant.rid,
-      });
+      return await this.restaurantModel.findOneAndDelete({ rid });
     } catch (error) {
       console.log('deleteRestaurant error: ', error);
       throw new InternalServerErrorException('Could not delete restaurant');

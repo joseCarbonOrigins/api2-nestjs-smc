@@ -94,11 +94,11 @@ export class RestaurantDto {
   @ApiProperty({
     description: 'Restaurant zip',
     required: true,
-    type: Number,
+    type: String,
   })
   @IsNotEmpty()
-  @IsNumber()
-  zip: number;
+  @IsString()
+  zip: string;
 
   @ApiProperty({
     description: 'Restaurant phone',
@@ -138,7 +138,7 @@ export class RestaurantDto {
 
   @ApiProperty({
     description: 'Restaurant unlock code',
-    required: true,
+    required: false,
     type: Number,
     default: 2022,
   })
