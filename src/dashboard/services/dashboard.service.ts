@@ -19,6 +19,8 @@ import { SkipstersQueryDto } from '../dto/skipsters.dto';
 import { SkippyModidyDto } from '../dto/skippy.dto';
 // schemas
 import { Skip } from '../../database/schemas/skip.schema';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 
 const monthNames = [
@@ -60,6 +62,7 @@ export class DashboardService {
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
     private lambdaService: LambdaService,
     private dl: DeliverLogicService,
+    private configService: ConfigService,
   ) {}
 
   async getDashboardInfo(): Promise<any> {
@@ -466,15 +469,33 @@ export class DashboardService {
     }
   }
 
-  // async testingSantiago(): Promise<any> {
-  //   try {
-  //     return this.getDistance(
-  //       '45.0006638,-93.2700000',
-  //       '44.0006621,-92.2700000',
-  //     );
-  //   } catch (e) {
-  //     console.log(e);
-  //     throw new NotFoundException(e);
-  //   }
-  // }
+  async getDistanceAndDuration(
+    origin: string,
+    destination: string,
+  ): Promise<any> {
+    try {
+      const key = this.configService.get('GOOGLE_MAPS_KEY');
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&key=${key}`;
+      const response = await axios.get(url);
+      const distance = response.data.routes[0].legs[0].distance.value;
+      const duration = response.data.routes[0].legs[0].duration.value;
+      return { distance: distance, duration: duration * 1000 };
+    } catch (e) {
+      throw new NotFoundException(
+        "getDistance - Couldn't get distance between two points",
+      );
+    }
+  }
+
+  async testingSantiago(): Promise<any> {
+    try {
+      return this.getDistanceAndDuration(
+        '45.0006638,-93.2700000',
+        '44.0006621,-92.2700000',
+      );
+    } catch (e) {
+      console.log(e);
+      throw new NotFoundException(e);
+    }
+  }
 }

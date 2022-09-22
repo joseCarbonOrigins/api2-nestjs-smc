@@ -16,6 +16,7 @@ import { Mission } from '../../database/schemas/mission.schema';
 // functions
 import { FunctionsService } from '../../external/services/functions.service';
 import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class CronjobService {
   constructor(
@@ -24,6 +25,7 @@ export class CronjobService {
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     private lambdaService: LambdaService,
     private functionService: FunctionsService,
+    private configService: ConfigService,
   ) {}
 
   async getDistanceAndDuration(
@@ -31,11 +33,12 @@ export class CronjobService {
     destination: string,
   ): Promise<any> {
     try {
-      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&key=AIzaSyDqsHfaQSEmbhgmmjMXFMLp0xRSyWRAuQE`;
+      const key = this.configService.get('GOOGLE_MAPS_KEY');
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&key=${key}`;
       const response = await axios.get(url);
       const distance = response.data.routes[0].legs[0].distance.value;
       const duration = response.data.routes[0].legs[0].duration.value;
-      return { distance, duration };
+      return { distance: distance, duration: duration * 1000 };
     } catch (e) {
       throw new NotFoundException(
         "getDistance - Couldn't get distance between two points",

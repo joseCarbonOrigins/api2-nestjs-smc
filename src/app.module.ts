@@ -23,6 +23,7 @@ import config from './config';
         MONGODB_URI: Joi.string().required(),
         TWILIO_ACCOUNT_SID: Joi.string().required(),
         TWILIO_AUTH_TOKEN: Joi.string().required(),
+        GOOGLE_MAPS_KEY: Joi.string().required(),
       }),
     }),
     OriginsModule,
