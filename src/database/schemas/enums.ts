@@ -31,3 +31,8 @@ export const enum Skipster_Type {
   shift = 'shift',
   gig = 'gig',
 }
+
+export const enum Skippy_Type {
+  skippy = 'skippy',
+  segway = 'segway',
+}

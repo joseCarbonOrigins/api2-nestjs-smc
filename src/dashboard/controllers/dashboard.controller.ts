@@ -14,7 +14,9 @@ import { DashboardService } from '../services/dashboard.service';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
-import { SkippyModidyDto } from '../dto/skippy.dto';
+import { SkippyDto } from '../dto/skippy.dto';
+import { SkippyModifyDto } from '../dto/skippyModify.dto';
+import { required } from 'joi';
 
 @ApiTags('Dashboard')
 @Controller('dashboard')
@@ -75,12 +77,19 @@ export class DashboardController {
   @Header('Access-Control-Allow-Origin', '*')
   modifySkippy(
     @Param('skippyemail') skippyemail: string,
-    @Body() body: SkippyModidyDto,
+    @Body() body: SkippyModifyDto,
   ) {
-    return this.dashboardService.modidySkippy(skippyemail, body);
+    return this.dashboardService.modifySkippy(skippyemail, body);
   }
 
-  @ApiOperation({ summary: `Modify skippy's information` })
+  @ApiOperation({ summary: `Create skippy` })
+  @Post('skippy')
+  @Header('Access-Control-Allow-Origin', '*')
+  createSkippy(@Body() body: SkippyDto) {
+    return this.dashboardService.createSkippy(body);
+  }
+
+  @ApiOperation({ summary: `TESTING Santi` })
   @Get('testingSantiago')
   @Header('Access-Control-Allow-Origin', '*')
   testingSantiago() {

@@ -16,12 +16,12 @@ import { LambdaService } from '../../external/services/lambda.service';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
-import { SkippyModidyDto } from '../dto/skippy.dto';
+import { SkippyDto } from '../dto/skippy.dto';
+import { SkippyModifyDto } from '../dto/skippyModify.dto';
 // schemas
 import { Skip } from '../../database/schemas/skip.schema';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
-
 
 const monthNames = [
   'January',
@@ -455,17 +455,29 @@ export class DashboardService {
     }
   }
 
-  async modidySkippy(skippyemail: string, body: SkippyModidyDto): Promise<any> {
+  async modifySkippy(skippyemail: string, body: SkippyModifyDto): Promise<any> {
     try {
       const skippy = await this.skippyModel
         .findOneAndUpdate({ email: skippyemail }, body)
-        .select('name email current_skip ip_address');
+        .select(
+          '-_id name email short_id ip_address agora_channel phone_number ',
+        );
       return skippy;
     } catch (error) {
       console.log('error modifying skippys information');
       throw new InternalServerErrorException(
         'Could not modify skippy information',
       );
+    }
+  }
+
+  async createSkippy(body: SkippyDto): Promise<any> {
+    try {
+      const skippy = await this.skippyModel.create(body);
+      return skippy;
+    } catch (error) {
+      console.log('error creating skippy');
+      throw new InternalServerErrorException('Could not create skippy');
     }
   }
 
@@ -481,9 +493,7 @@ export class DashboardService {
       const duration = response.data.routes[0].legs[0].duration.value;
       return { distance: distance, duration: duration * 1000 };
     } catch (e) {
-      throw new NotFoundException(
-        "getDistance - Couldn't get distance between two points",
-      );
+      return { distance: 0, duration: 0 };
     }
   }
 

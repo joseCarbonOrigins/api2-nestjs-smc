@@ -692,21 +692,16 @@ export class OriginsService {
         .where({
           email: skippyname,
         })
-        .select('name email ip_address cameras_arrangement agora_channel');
-      const response = (({
-        name,
-        email,
-        ip_address,
-        cameras_arrangement,
-        agora_channel,
-      }) => ({
-        name,
-        email,
-        ip_address,
-        cameras_arrangement,
-        agora_channel,
-      }))(theSkippy[0]);
-      return response;
+        .select('-_id name email ip_address cameras_arrangement agora_channel type');
+      const skippyData = {
+        name: theSkippy[0].name,
+        email: theSkippy[0].email,
+        ip_address: theSkippy[0].ip_address,
+        cameras_arrangement: theSkippy[0].cameras_arrangement,
+        agora_channel: theSkippy[0].agora_channel,
+        type: theSkippy[0].type,
+      };
+      return skippyData;
     } catch (error) {
       throw new InternalServerErrorException(
         'getSkippyData - Couldnt return skippy data',
@@ -741,7 +736,7 @@ export class OriginsService {
       const Skippies = await this.skippyModel
         .find({})
         .select(
-          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel',
+          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type',
         );
       return Skippies;
     } catch (error) {
