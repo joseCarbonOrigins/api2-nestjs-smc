@@ -1,22 +1,22 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Mission_State, Status } from './enums';
+import { Mission_State, Status, Skippy_Type } from './enums';
 
 @Schema()
 export class Skippy extends Document {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   name: string;
 
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: 'waiting_order' })
   mission: Mission_State;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: 'active' })
   status: Status;
 
-  @Prop()
+  @Prop({ required: false, default: null })
   current_skip_id: Types.ObjectId;
 
   @Prop(
@@ -24,33 +24,39 @@ export class Skippy extends Document {
       type: {
         type: String,
         enum: ['Point'],
-        required: true,
+        default: 'Point',
       },
       coordinates: {
         type: [Number],
-        required: true,
+        default: [45.0006638, -93.270256],
       },
     }),
   )
   location: Record<string, number[]>;
 
-  @Prop({ ref: 'Skip', default: [] })
+  @Prop({ required: false, ref: 'Skip', default: [] })
   skips: [Types.ObjectId];
 
-  @Prop({ ref: 'Mission', default: [] })
+  @Prop({ required: false, ref: 'Mission', default: [] })
   missions: [Types.ObjectId];
 
-  @Prop({ required: true, default: [1, 2, 3, 4] })
+  @Prop({ required: false, default: [1, 2, 3, 4] })
   cameras_arrangement: number[];
 
   @Prop({ required: false })
   short_id: string;
 
-  @Prop({ required: true, default: '192.68.0.1' })
+  @Prop({ required: false, default: '192.68.0.1' })
   ip_address: string;
 
-  @Prop({ required: true, default: 'skippy-' })
+  @Prop({ required: false, default: 'skippy-' })
   agora_channel: string;
+
+  @Prop({ required: false, default: '000-000-0000' })
+  phone_number: string;
+
+  @Prop({ required: true, default: 'skippy' })
+  type: Skippy_Type;
 }
 
 export const SkippySchema = SchemaFactory.createForClass(Skippy);

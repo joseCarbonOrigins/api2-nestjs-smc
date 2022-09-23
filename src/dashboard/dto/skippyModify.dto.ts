@@ -1,12 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { Skippy_Type } from 'src/database/schemas/enums';
 
-export class SkippyDto {
+export class SkippyModifyDto {
   @IsString()
   @ApiProperty({
     description: 'Skippy name',
-    required: true,
+    required: false,
     type: String,
   })
   name: string;
@@ -14,7 +13,7 @@ export class SkippyDto {
   @IsString()
   @ApiProperty({
     description: 'Skippy email',
-    required: true,
+    required: false,
     type: String,
   })
   email: string;
@@ -50,11 +49,4 @@ export class SkippyDto {
     type: String,
   })
   phone_number: string;
-
-  @IsString()
-  @ApiProperty({
-    description: 'Skippy type',
-    required: true,
-  })
-  type: Skippy_Type;
 }

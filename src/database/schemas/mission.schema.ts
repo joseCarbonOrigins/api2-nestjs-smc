@@ -81,6 +81,9 @@ export class Mission extends Document {
 
   @Prop({ default: 0 })
   driving_time: number;
+
+  @Prop({ default: 0 })
+  distance: number;
 }
 
 export const MissionSchema = SchemaFactory.createForClass(Mission);

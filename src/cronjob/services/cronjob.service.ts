@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 // AWS
@@ -11,6 +15,9 @@ import { Skip } from '../../database/schemas/skip.schema';
 import { Mission } from '../../database/schemas/mission.schema';
 // functions
 import { FunctionsService } from '../../external/services/functions.service';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
+import { duration } from 'moment';
 @Injectable()
 export class CronjobService {
   constructor(
@@ -19,7 +26,24 @@ export class CronjobService {
     @InjectModel(Mission.name) private missionModel: Model<Mission>,
     private lambdaService: LambdaService,
     private functionService: FunctionsService,
+    private configService: ConfigService,
   ) {}
+
+  async getDistanceAndDuration(
+    origin: string,
+    destination: string,
+  ): Promise<any> {
+    try {
+      const key = this.configService.get('GOOGLE_MAPS_KEY');
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&key=${key}`;
+      const response = await axios.get(url);
+      const distance = response.data.routes[0].legs[0].distance.value;
+      const duration = response.data.routes[0].legs[0].duration.value;
+      return { distance: distance, duration: duration * 1000 };
+    } catch (e) {
+      return { distance: 0, duration: 0 };
+    }
+  }
 
   async pushSkippysOrders(payload: Cronjob): Promise<any> {
     try {
@@ -95,10 +119,19 @@ export class CronjobService {
       unlock_code: pincode,
     });
     await newSkip.save();
-    // update skippy with current skip
-    await this.skippyModel.findByIdAndUpdate(isSkippyNotBusy._id, {
-      current_skip_id: newSkip._id,
-    });
+
+    let firstcoordinate =
+      `${isSkippyNotBusy.location.coordinates[0]}`.toString() +
+      ',' +
+      `${isSkippyNotBusy.location.coordinates[1]}`.toString();
+    let secondcoordinate =
+      `${order.restaurant.lat}`.toString() +
+      ',' +
+      `${order.restaurant.long}`.toString();
+    let distanceAndDuration = await this.getDistanceAndDuration(
+      firstcoordinate,
+      secondcoordinate,
+    );
     const newMission1 = new this.missionModel({
       mission_name: 'Driving to merchant',
       // DUMMY START POINT
@@ -114,8 +147,7 @@ export class CronjobService {
       // dummy values
       mission_xp: 15,
       mission_coins: 15,
-      estimated_time: 900,
-
+      estimated_time: distanceAndDuration['duration'],
       mission_completed: false,
       previous_mission_completed: true,
       previous_mission_id: null,
@@ -124,7 +156,21 @@ export class CronjobService {
       startTime: null,
       endTime: null,
       skipster_id: null,
+
+      distance: distanceAndDuration['distance'],
     });
+    firstcoordinate =
+      `${order.restaurant.lat}`.toString() +
+      ',' +
+      `${order.restaurant.long}`.toString();
+    secondcoordinate =
+      `${order.customer.lat}`.toString() +
+      ',' +
+      `${order.customer.long}`.toString();
+    distanceAndDuration = await this.getDistanceAndDuration(
+      firstcoordinate,
+      secondcoordinate,
+    );
     const newMission2 = new this.missionModel({
       mission_name: 'Driving to customer',
       start_point: {
@@ -142,7 +188,7 @@ export class CronjobService {
       // dummy values
       mission_xp: 15,
       mission_coins: 15,
-      estimated_time: 900,
+      estimated_time: distanceAndDuration['duration'],
 
       mission_completed: false,
       previous_mission_completed: false,
@@ -152,7 +198,19 @@ export class CronjobService {
       startTime: null,
       endTime: null,
       skipster_id: null,
+
+      distance: distanceAndDuration['distance'],
     });
+
+    firstcoordinate =
+      `${order.customer.lat}`.toString() +
+      ',' +
+      `${order.customer.long}`.toString();
+    secondcoordinate = `45.000674262505754, -93.26999691463327`;
+    distanceAndDuration = await this.getDistanceAndDuration(
+      firstcoordinate,
+      secondcoordinate,
+    );
     const newMission3 = new this.missionModel({
       mission_name: 'Driving Home',
       start_point: {
@@ -170,7 +228,7 @@ export class CronjobService {
       // dummy values
       mission_xp: 15,
       mission_coins: 15,
-      estimated_time: 900,
+      estimated_time: distanceAndDuration['duration'],
 
       mission_completed: false,
       previous_mission_completed: false,
@@ -180,6 +238,19 @@ export class CronjobService {
       startTime: null,
       endTime: null,
       skipster_id: null,
+
+      distance: distanceAndDuration['distance'],
+    });
+
+    // update skippy with current skip
+    await this.skippyModel.findByIdAndUpdate(isSkippyNotBusy._id, {
+      current_skip_id: newSkip._id,
+      $push: {
+        skips: newSkip._id,
+        missions: {
+          $each: [newMission1._id, newMission2._id, newMission3._id],
+        },
+      },
     });
 
     await newMission1.save();

@@ -16,9 +16,12 @@ import { LambdaService } from '../../external/services/lambda.service';
 // dto
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
-import { SkippyModidyDto } from '../dto/skippy.dto';
+import { SkippyDto } from '../dto/skippy.dto';
+import { SkippyModifyDto } from '../dto/skippyModify.dto';
 // schemas
 import { Skip } from '../../database/schemas/skip.schema';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 const monthNames = [
   'January',
@@ -59,6 +62,7 @@ export class DashboardService {
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
     private lambdaService: LambdaService,
     private dl: DeliverLogicService,
+    private configService: ConfigService,
   ) {}
 
   async getDashboardInfo(): Promise<any> {
@@ -451,11 +455,13 @@ export class DashboardService {
     }
   }
 
-  async modidySkippy(skippyemail: string, body: SkippyModidyDto): Promise<any> {
+  async modifySkippy(skippyemail: string, body: SkippyModifyDto): Promise<any> {
     try {
       const skippy = await this.skippyModel
         .findOneAndUpdate({ email: skippyemail }, body)
-        .select('name email current_skip ip_address');
+        .select(
+          '-_id name email short_id ip_address agora_channel phone_number ',
+        );
       return skippy;
     } catch (error) {
       console.log('error modifying skippys information');
@@ -465,23 +471,41 @@ export class DashboardService {
     }
   }
 
-  // async testingSantiago(): Promise<any> {
-  //   try {
-  //     const misiones = await this.missionModel
-  //       .find({})
-  //       .select('_id name mission_completed mock skipster_id')
-  //       .sort({ _id: 'desc' });
-  //     let resultado = 0;
-  //     const respuesta = misiones.forEach((mission) => {
-  //       if ((mission as any).skipster_id === '62b204e9dbce1ef4676a8c96') {
-  //         resultado += 1;
-  //       }
-  //       return { resultado: resultado };
-  //     });
-  //     return resultado;
-  //   } catch (e) {
-  //     console.log(e);
-  //     throw new NotFoundException(e);
-  //   }
-  // }
+  async createSkippy(body: SkippyDto): Promise<any> {
+    try {
+      const skippy = await this.skippyModel.create(body);
+      return skippy;
+    } catch (error) {
+      console.log('error creating skippy');
+      throw new InternalServerErrorException('Could not create skippy');
+    }
+  }
+
+  async getDistanceAndDuration(
+    origin: string,
+    destination: string,
+  ): Promise<any> {
+    try {
+      const key = this.configService.get('GOOGLE_MAPS_KEY');
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=walking&key=${key}`;
+      const response = await axios.get(url);
+      const distance = response.data.routes[0].legs[0].distance.value;
+      const duration = response.data.routes[0].legs[0].duration.value;
+      return { distance: distance, duration: duration * 1000 };
+    } catch (e) {
+      return { distance: 0, duration: 0 };
+    }
+  }
+
+  async testingSantiago(): Promise<any> {
+    try {
+      return this.getDistanceAndDuration(
+        '45.0006638,-93.2700000',
+        '44.0006621,-92.2700000',
+      );
+    } catch (e) {
+      console.log(e);
+      throw new NotFoundException(e);
+    }
+  }
 }
