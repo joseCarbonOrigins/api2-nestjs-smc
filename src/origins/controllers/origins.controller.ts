@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Body,
   Controller,
@@ -19,6 +20,7 @@ import {
   AcceptDeclineMissionDto,
 } from '../dtos/missions.dto';
 import { CamerasArrangementDto } from '../dtos/skippy.dto';
+import { SubmitEventDto } from '../dtos/event.dto';
 
 @ApiTags('Origins')
 @Controller('origins')
@@ -143,6 +145,13 @@ export class OriginsController {
   @Header('Access-Control-Allow-Origin', '*')
   getAllSkippies() {
     return this.originsService.getAllSkippies();
+  }
+
+  @ApiOperation({ summary: 'Submit events' })
+  @Post('event')
+  @Header('Access-Control-Allow-Origin', '*')
+  submitEvent(@Body() payload: SubmitEventDto) {
+    return this.originsService.submitEvent(payload);
   }
 
   @ApiOperation({ summary: 'Receive skippys orders' })

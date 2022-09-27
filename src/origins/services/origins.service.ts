@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose'; // aws
+import { Model, Types } from 'mongoose'; // aws
 import { LambdaService } from '../../external/services/lambda.service';
 import { FunctionsService } from '../../external/services/functions.service';
 // dtos
@@ -15,6 +16,7 @@ import {
   AcceptDeclineMissionDto,
 } from '../dtos/missions.dto';
 import { CamerasArrangementDto } from '../dtos/skippy.dto';
+import { SubmitEventDto } from '../dtos/event.dto';
 // external services
 import { DeliverLogicService } from '../../external/services/deliver-logic.service';
 import { TwilioService } from '../../external/services/twilio.service';
@@ -22,11 +24,15 @@ import { OriginsDaoService } from '../data/origins-dao.service';
 import { LockingMechanismService } from 'src/external/services/locking-mechanism.service';
 // schemas
 import { Skippy } from '../../database/schemas/skippy.schema';
+import { Skipster } from '../../database/schemas/skipster.schema';
+import { Event } from '../../database/schemas/event.schema';
 
 @Injectable()
 export class OriginsService {
   constructor(
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
+    @InjectModel(Skipster.name) private skipsterModel: Model<Skipster>,
+    @InjectModel(Event.name) private eventModel: Model<Event>,
     private originsData: OriginsDaoService,
     private twilio: TwilioService,
     private dl: DeliverLogicService,
@@ -692,21 +698,18 @@ export class OriginsService {
         .where({
           email: skippyname,
         })
-        .select('name email ip_address cameras_arrangement agora_channel');
-      const response = (({
-        name,
-        email,
-        ip_address,
-        cameras_arrangement,
-        agora_channel,
-      }) => ({
-        name,
-        email,
-        ip_address,
-        cameras_arrangement,
-        agora_channel,
-      }))(theSkippy[0]);
-      return response;
+        .select(
+          '-_id name email ip_address cameras_arrangement agora_channel type',
+        );
+      const skippyData = {
+        name: theSkippy[0].name,
+        email: theSkippy[0].email,
+        ip_address: theSkippy[0].ip_address,
+        cameras_arrangement: theSkippy[0].cameras_arrangement,
+        agora_channel: theSkippy[0].agora_channel,
+        type: theSkippy[0].type,
+      };
+      return skippyData;
     } catch (error) {
       throw new InternalServerErrorException(
         'getSkippyData - Couldnt return skippy data',
@@ -741,12 +744,35 @@ export class OriginsService {
       const Skippies = await this.skippyModel
         .find({})
         .select(
-          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel',
+          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type',
         );
       return Skippies;
     } catch (error) {
       throw new InternalServerErrorException(
         'getAllSkippies - Couldnt return skippy data',
+      );
+    }
+  }
+
+  async submitEvent(payload: SubmitEventDto): Promise<any> {
+    try {
+      const theSkipster = await this.skipsterModel.findOne({
+        _id: payload.skipster_id,
+      });
+      if (!theSkipster) {
+        throw new NotFoundException('Skipster not found');
+      }
+      const theEvent = await this.eventModel.create({
+        skipster_id: theSkipster._id,
+        date: payload.date,
+        type: payload.type,
+        data: payload.data,
+        platform: payload.platform,
+      });
+      return theEvent;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'submitEvent - Couldnt submit event',
       );
     }
   }
