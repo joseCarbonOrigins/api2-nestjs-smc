@@ -17,7 +17,7 @@ import { LambdaService } from '../../external/services/lambda.service';
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
 import { SkippyDto } from '../dto/skippy.dto';
-import { SkippyModifyDto } from '../dto/skippyModify.dto';
+import { SkippyModifyDto } from '../dto/skippy.dto';
 // schemas
 import { Skip } from '../../database/schemas/skip.schema';
 import axios from 'axios';

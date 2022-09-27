@@ -10,6 +10,7 @@ import { Skipster, SkipsterSchema } from './schemas/skipster.schema';
 import { Log, LogSchema } from './schemas/log.schema';
 import { Mission, MissionSchema } from './schemas/mission.schema';
 import { Restaurant, RestaurantSchema } from './schemas/restaurant.schema';
+import { Event, EventSchema } from './schemas/event.schema';
 
 @Global()
 @Module({
@@ -38,7 +39,11 @@ import { Restaurant, RestaurantSchema } from './schemas/restaurant.schema';
       {
         name: Restaurant.name,
         schema: RestaurantSchema,
-      }
+      },
+      {
+        name: Event.name,
+        schema: EventSchema,
+      },
     ]),
     MongooseModule.forRootAsync({
       useFactory: async (configService: ConfigType<typeof config>) => ({
