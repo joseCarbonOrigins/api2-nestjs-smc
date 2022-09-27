@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Mission_State, Status, Skippy_Type } from './enums';
+import { Mission_State, Status, Skippy_Type, enumValues } from './enums';
 
 @Schema()
 export class Skippy extends Document {
@@ -10,13 +10,16 @@ export class Skippy extends Document {
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: false, default: 'waiting_order' })
-  mission: Mission_State;
+  @Prop({
+    default: 'waiting_order',
+    enum: enumValues(Mission_State),
+  })
+  mission: string;
 
-  @Prop({ required: false, default: 'active' })
-  status: Status;
+  @Prop({ default: 'active', enum: enumValues(Status) })
+  status: string;
 
-  @Prop({ required: false, default: null })
+  @Prop({ default: null })
   current_skip_id: Types.ObjectId;
 
   @Prop(
@@ -34,29 +37,32 @@ export class Skippy extends Document {
   )
   location: Record<string, number[]>;
 
-  @Prop({ required: false, ref: 'Skip', default: [] })
+  @Prop({ ref: 'Skip', default: [] })
   skips: [Types.ObjectId];
 
-  @Prop({ required: false, ref: 'Mission', default: [] })
+  @Prop({ ref: 'Mission', default: [] })
   missions: [Types.ObjectId];
 
-  @Prop({ required: false, default: [1, 2, 3, 4] })
+  @Prop({ default: [1, 2, 3, 4] })
   cameras_arrangement: number[];
 
   @Prop({ required: false })
   short_id: string;
 
-  @Prop({ required: false, default: '192.68.0.1' })
+  @Prop({ default: '192.68.0.1' })
   ip_address: string;
 
-  @Prop({ required: false, default: 'skippy-' })
+  @Prop({ default: 'skippy-' })
   agora_channel: string;
 
-  @Prop({ required: false, default: '000-000-0000' })
+  @Prop({ default: '000-000-0000' })
   phone_number: string;
 
-  @Prop({ required: true, default: 'skippy' })
-  type: Skippy_Type;
-}
+  @Prop({
+    default: 'skippy',
+    enum: enumValues(Skippy_Type),
+  })
+  type: string;
 
+}
 export const SkippySchema = SchemaFactory.createForClass(Skippy);

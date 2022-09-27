@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Module, Global } from '@nestjs/common';
 import { DeliverLogicService } from './services/deliver-logic.service';
 import { HttpModule } from '@nestjs/axios';

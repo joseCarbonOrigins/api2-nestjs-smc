@@ -15,8 +15,7 @@ import { DashboardService } from '../services/dashboard.service';
 import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
 import { SkippyDto } from '../dto/skippy.dto';
-import { SkippyModifyDto } from '../dto/skippyModify.dto';
-import { required } from 'joi';
+import { SkippyModifyDto } from '../dto/skippy.dto';
 
 @ApiTags('Dashboard')
 @Controller('dashboard')

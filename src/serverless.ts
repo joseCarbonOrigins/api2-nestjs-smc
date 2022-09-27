@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import serverlessExpress from '@vendia/serverless-express';
 import { Context, Handler, Callback } from 'aws-lambda';
@@ -25,6 +25,7 @@ async function bootstrap(): Promise<Handler> {
   await app.init();
   setUpSwagger(app);
   app.enableCors();
+  app.useGlobalPipes(new ValidationPipe());
   const expressApp = app.getHttpAdapter().getInstance();
   return serverlessExpress({ app: expressApp });
 }

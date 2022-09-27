@@ -1,10 +1,10 @@
-export const enum Status {
+export enum Status {
   active = 'active',
   inactive = 'inactive',
   busy = 'busy',
 }
 
-export const enum Mission_State {
+export enum Mission_State {
   waiting_order = 'waiting_order',
   driving_merchant = 'driving_merchant',
   waiting_merchant = 'waiting_merchant',
@@ -17,7 +17,7 @@ export const enum Mission_State {
   Driving_Home = 'Driving Home',
 }
 
-export const enum Order_Satus {
+export enum Order_Satus {
   new = 'new',
   confirmed = 'confirmed',
   placing = 'placing',
@@ -27,12 +27,36 @@ export const enum Order_Satus {
   delivered = 'delivered',
 }
 
-export const enum Skipster_Type {
+export enum Skipster_Type {
   shift = 'shift',
   gig = 'gig',
 }
 
-export const enum Skippy_Type {
+export enum Skippy_Type {
   skippy = 'skippy',
   segway = 'segway',
+}
+
+export enum Event_Type {
+  mission_picked = 'mission_picked',
+  robot_engage = 'robot_engage',
+  robot_disengage = 'robot_disengage',
+  headset_engage = 'headset_engage',
+  headset_disengage = 'headset_disengage',
+  room_engage = 'room_engage',
+  room_disengage = 'room_disengage',
+}
+
+export enum Platform_Name {
+  origins = 'origins',
+  smc = 'smc',
+}
+
+export enum Enviroment {
+  production = 'production',
+  testing = 'testing',
+}
+
+export function enumValues<T extends Record<string, any>>(e: T): T[keyof T][] {
+  return Object.keys(e).map((k) => e[k]);
 }
