@@ -113,10 +113,12 @@ export class CronjobService {
     // create new skip for skippy
     const newSkip = new this.skipModel({
       startTime: today,
+      endTime: null,
       skippy_id: isSkippyNotBusy._id,
       order_info: oderInfo,
       mock: false,
       unlock_code: pincode,
+      estimated_time: 0,
     });
     await newSkip.save();
 
@@ -132,6 +134,7 @@ export class CronjobService {
       firstcoordinate,
       secondcoordinate,
     );
+    const ismock = order.mock ? order.mock : false;
     const newMission1 = new this.missionModel({
       mission_name: 'Driving to merchant',
       // DUMMY START POINT
@@ -146,12 +149,12 @@ export class CronjobService {
       skip_id: newSkip._id,
       // dummy values
       mission_xp: 15,
-      mission_coins: 15,
+      mission_coins: this.calculateCoins(distanceAndDuration['distance']),
       estimated_time: distanceAndDuration['duration'],
       mission_completed: false,
       previous_mission_completed: true,
       previous_mission_id: null,
-      mock: false,
+      mock: ismock,
 
       startTime: null,
       endTime: null,
@@ -187,13 +190,13 @@ export class CronjobService {
 
       // dummy values
       mission_xp: 15,
-      mission_coins: 15,
+      mission_coins: this.calculateCoins(distanceAndDuration['distance']),
       estimated_time: distanceAndDuration['duration'],
 
       mission_completed: false,
       previous_mission_completed: false,
       previous_mission_id: newMission1._id,
-      mock: false,
+      mock: ismock,
 
       startTime: null,
       endTime: null,
@@ -227,13 +230,13 @@ export class CronjobService {
 
       // dummy values
       mission_xp: 15,
-      mission_coins: 15,
+      mission_coins: this.calculateCoins(distanceAndDuration['distance']),
       estimated_time: distanceAndDuration['duration'],
 
       mission_completed: false,
       previous_mission_completed: false,
       previous_mission_id: newMission2._id,
-      mock: false,
+      mock: ismock,
 
       startTime: null,
       endTime: null,
@@ -242,7 +245,6 @@ export class CronjobService {
       distance: distanceAndDuration['distance'],
     });
 
-    // update skippy with current skip
     await this.skippyModel.findByIdAndUpdate(isSkippyNotBusy._id, {
       current_skip_id: newSkip._id,
       $push: {
@@ -258,14 +260,24 @@ export class CronjobService {
     await newMission3.save();
 
     await this.skipModel.findByIdAndUpdate(newSkip._id, {
-      $push: { missions: newMission1 },
+      $push: {
+        missions: {
+          $each: [newMission1._id, newMission2._id, newMission3._id],
+        },
+      },
+      estimated_time:
+        newMission1.estimated_time +
+        newMission2.estimated_time +
+        newMission3.estimated_time,
     });
-    await this.skipModel.findByIdAndUpdate(newSkip._id, {
-      $push: { missions: newMission2 },
-    });
-    await this.skipModel.findByIdAndUpdate(newSkip._id, {
-      $push: { missions: newMission3 },
-    });
+  }
+
+  calculateCoins(distance: number) {
+    try {
+      return (distance / 4 / 7.25).toFixed(2);
+    } catch (error) {
+      return 15;
+    }
   }
 }
 
