@@ -449,11 +449,33 @@ export class DashboardService {
     }
   }
 
+  async deleteWholeOperation(skippy_id: string): Promise<any> {
+    try {
+      const skippy = await this.skippyModel.findById(skippy_id);
+      const skip = await this.skipModel.findById(skippy.current_skip_id);
+      const response = {
+        skippy: skippy.name,
+        order: skip.order_info.order_id,
+        skip: skip._id,
+        missions: skip.missions,
+      };
+      await this.missionModel.deleteMany({ _id: { $in: skip.missions } });
+      await this.skipModel.findByIdAndDelete(skippy.current_skip_id);
+      await this.skippyModel.findByIdAndUpdate(skippy_id, {
+        current_skip_id: null,
+      });
+      return response;
+    } catch (error) {
+      console.log('error deleting operation');
+      throw new InternalServerErrorException('Could not delete operation');
+    }
+  }
+
   async testingSantiago(): Promise<any> {
     try {
       return this.getDistanceAndDuration(
-        '45.0006638,-93.2700000',
-        '44.0006621,-92.2700000',
+        '-34.908963, -56.1902335',
+        '-34.9094299, -56.1937528',
       );
     } catch (e) {
       console.log(e);

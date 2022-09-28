@@ -26,6 +26,7 @@ import { LockingMechanismService } from 'src/external/services/locking-mechanism
 import { Skippy } from '../../database/schemas/skippy.schema';
 import { Skipster } from '../../database/schemas/skipster.schema';
 import { Event } from '../../database/schemas/event.schema';
+import { Skip } from 'src/database/schemas/skip.schema';
 
 @Injectable()
 export class OriginsService {
@@ -33,6 +34,7 @@ export class OriginsService {
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
     @InjectModel(Skipster.name) private skipsterModel: Model<Skipster>,
     @InjectModel(Event.name) private eventModel: Model<Event>,
+    @InjectModel(Skip.name) private skipModel: Model<Skip>,
     private originsData: OriginsDaoService,
     private twilio: TwilioService,
     private dl: DeliverLogicService,
@@ -207,8 +209,6 @@ export class OriginsService {
         },
       );
 
-      // add driving time to skipster
-
       // update mission to completed
       await this.originsData.updateMission(
         {
@@ -228,6 +228,12 @@ export class OriginsService {
         },
       };
       this.lambdaService.invokeLambda(lambdaPayload);
+
+      await this.skipsterModel.findByIdAndUpdate(mission.skipster_id, {
+        $inc: {
+          driving_time: drivingTime,
+        },
+      });
 
       return { message: 'mission1 ended' };
     } catch (e) {
@@ -256,8 +262,6 @@ export class OriginsService {
           driving_time: drivingTime,
         },
       );
-
-      // add driving time to skipster
 
       // update mission to completed
       await this.originsData.updateMission(
@@ -296,6 +300,12 @@ export class OriginsService {
       };
       this.lambdaService.invokeLambda(lambdaPayload);
 
+      await this.skipsterModel.findByIdAndUpdate(mission.skipster_id, {
+        $inc: {
+          driving_time: drivingTime,
+        },
+      });
+
       return { message: 'mission2 ended' };
     } catch (e) {
       console.log('END MISSION 2 ERROR ', e);
@@ -325,8 +335,6 @@ export class OriginsService {
         },
       );
 
-      // add driving time to skipster
-
       await this.originsData.updateSkippy(
         {
           current_skip_id: endedMission.skip_id._id,
@@ -347,6 +355,16 @@ export class OriginsService {
         },
       };
       this.lambdaService.invokeLambda(lambdaPayload);
+
+      await this.skipsterModel.findByIdAndUpdate(mission.skipster_id, {
+        $inc: {
+          driving_time: drivingTime,
+        },
+      });
+
+      await this.skipModel.findByIdAndUpdate(endedMission.skip_id._id, {
+        endTime: todayDate,
+      });
 
       return { message: 'mission3 ended' };
     } catch (e) {

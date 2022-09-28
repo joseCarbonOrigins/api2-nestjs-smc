@@ -88,6 +88,13 @@ export class DashboardController {
     return this.dashboardService.createSkippy(body);
   }
 
+  @ApiOperation({ summary: `Delete skippy current skip and missions` })
+  @Delete('testing/skippy/:skippy_id/operation')
+  @Header('Access-Control-Allow-Origin', '*')
+  deleteWholeOperation(@Param('skippy_id') skippy_id: string) {
+    return this.dashboardService.deleteWholeOperation(skippy_id);
+  }
+
   @ApiOperation({ summary: `TESTING Santi` })
   @Get('testingSantiago')
   @Header('Access-Control-Allow-Origin', '*')
