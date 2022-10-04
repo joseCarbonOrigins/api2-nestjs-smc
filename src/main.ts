@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as Sentry from '@sentry/serverless';
 
 function setUpSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
@@ -24,3 +25,13 @@ async function bootstrap() {
   await app.listen(3000);
 }
 bootstrap();
+
+Sentry.AWSLambda.init({
+  dsn: "https://aec92c65ed10431faf5a0f02ea14f174@o4503922291507200.ingest.sentry.io/4503923308822528",
+  
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
+

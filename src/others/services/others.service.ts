@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 // schemas
 import { Restaurant } from 'src/database/schemas/restaurant.schema';
+import * as Sentry from '@sentry/node';
+import '@sentry/tracing';
 
 @Injectable()
 export class OthersService {
@@ -54,4 +56,25 @@ export class OthersService {
       throw new InternalServerErrorException('Could not delete restaurant');
     }
   }
+
+  async throwError(): Promise<void> {
+    //try catch
+    try {
+      throw new Error('throw error');
+    }
+    catch (error) {
+      // Sentry.captureException(error);
+    }
+  }
+
+  async throwErrorSentry(): Promise<void> {
+    //try catch
+    try {
+      throw new Error('throw error');
+    }
+    catch (error) {
+      Sentry.captureException(error);
+    }
+  }
+
 }

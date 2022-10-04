@@ -76,7 +76,7 @@ export class Skip extends Document {
   endTime: Date;
 
   @Prop()
-  estimatedTime: number;
+  estimated_time: number;
 
   @Prop({ type: Types.ObjectId, ref: 'Skippy', required: true })
   skippy_id: Skippy | Types.ObjectId;

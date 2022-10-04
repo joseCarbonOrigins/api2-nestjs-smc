@@ -10,9 +10,10 @@ import {
 } from 'src/database/schemas/enums';
 
 export class SubmitEventDto {
+  @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  skipster_id: Types.ObjectId;
+  skipster_nickname: string;
 
   @ApiProperty()
   date: Date;

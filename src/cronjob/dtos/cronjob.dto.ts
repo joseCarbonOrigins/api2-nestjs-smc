@@ -113,4 +113,8 @@ class Order {
   @IsBoolean()
   @ApiProperty()
   data?: boolean;
+
+  @IsBoolean()
+  @ApiProperty()
+  mock?: boolean;
 }
