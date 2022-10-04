@@ -46,4 +46,19 @@ export class OthersController {
   deleteRestaurant(@Param('rid') rid: number) {
     return this.othersService.deleteRestaurant(rid);
   }
+
+  //throw error
+  @ApiOperation({ summary: `Throw error` })
+  @Get('error')
+  @Header('Access-Control-Allow-Origin', '*')
+  throwError() {
+    return this.othersService.throwError();
+  }
+
+  @ApiOperation({ summary: `Throw error Sentry` })
+  @Get('errorSentry')
+  @Header('Access-Control-Allow-Origin', '*')
+  throwErrorSentry() {
+    return this.othersService.throwErrorSentry();
+  }
 }

@@ -6,8 +6,8 @@ import { Skipster } from './skipster.schema';
 
 @Schema()
 export class Event extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'Skipster', required: true })
-  skipster_id: Skipster | Types.ObjectId;
+  @Prop({ required: true })
+  skipster_nickname: string;
 
   @Prop({ default: Date.now })
   date: Date;

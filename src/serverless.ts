@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import serverlessExpress from '@vendia/serverless-express';
 import { Context, Handler, Callback } from 'aws-lambda';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as Sentry from '@sentry/serverless';
 
 let server: Handler;
 
@@ -30,11 +31,16 @@ async function bootstrap(): Promise<Handler> {
   return serverlessExpress({ app: expressApp });
 }
 
-export const handler: Handler = async (
+const handlerteat: Handler = async (
   event: any,
   context: Context,
   callback: Callback,
 ) => {
   server = server ?? (await bootstrap());
+  console.log('+++ event: ', event);
+  console.log('+++ context: ', context);
+  console.log('+++ callback: ', callback);
   return server(event, context, callback);
 };
+
+export const handler = Sentry.AWSLambda.wrapHandler(handlerteat);

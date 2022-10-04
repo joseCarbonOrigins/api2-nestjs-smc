@@ -775,13 +775,13 @@ export class OriginsService {
   async submitEvent(payload: SubmitEventDto): Promise<any> {
     try {
       const theSkipster = await this.skipsterModel.findOne({
-        _id: payload.skipster_id,
+        nickname: payload.skipster_nickname,
       });
       if (!theSkipster) {
         throw new NotFoundException('Skipster not found');
       }
       const theEvent = await this.eventModel.create({
-        skipster_id: theSkipster._id,
+        skipster_nickname: theSkipster.nickname,
         date: payload.date,
         type: payload.type,
         data: payload.data,
