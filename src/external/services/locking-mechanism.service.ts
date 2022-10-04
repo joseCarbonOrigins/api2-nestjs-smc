@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class LockingMechanismService {
-  constructor(private http: HttpService) {}
+  constructor(
+    private http: HttpService,
+    private configService: ConfigService,
+  ) {}
 
   async sendLockingPayload(
     skippyIpAddress: string,
@@ -20,9 +24,13 @@ export class LockingMechanismService {
     };
 
     await firstValueFrom(
-      this.http.post('http://54.172.111.235:3000/skippy/locking', obj, {
-        headers: { 'Content-Type': 'application/json' },
-      }),
+      this.http.post(
+        `${this.configService.get('WS_SKIPPY_URL')}/skippy/locking`,
+        obj,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      ),
     );
   }
 }
