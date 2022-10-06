@@ -8,6 +8,7 @@ import {
   Query,
   Delete,
   Patch,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { DashboardService } from '../services/dashboard.service';
@@ -16,7 +17,9 @@ import { MissionQueryDto } from '../dto/missions.dto';
 import { SkipstersQueryDto } from '../dto/skipsters.dto';
 import { SkippyDto } from '../dto/skippy.dto';
 import { SkippyModifyDto } from '../dto/skippy.dto';
+import { SentryInterceptor } from '../../interceptors/sentry.interceptor';
 
+@UseInterceptors(SentryInterceptor)
 @ApiTags('Dashboard')
 @Controller('dashboard')
 export class DashboardController {

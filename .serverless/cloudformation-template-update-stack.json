@@ -74,7 +74,7 @@
     "MainLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/api2-nest-dev-main"
+        "LogGroupName": "/aws/lambda/api2-nest-prod-main"
       }
     },
     "IamRoleLambdaExecution": {
@@ -103,7 +103,7 @@
                 "-",
                 [
                   "api2-nest",
-                  "dev",
+                  "prod",
                   "lambda"
                 ]
               ]
@@ -119,7 +119,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-dev*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-prod*:*"
                     }
                   ]
                 },
@@ -130,7 +130,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-dev*:*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-prod*:*:*"
                     }
                   ]
                 }
@@ -144,7 +144,7 @@
             "-",
             [
               "api2-nest",
-              "dev",
+              "prod",
               {
                 "Ref": "AWS::Region"
               },
@@ -161,32 +161,42 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/api2-nest/dev/1664316617088-2022-09-27T22:10:17.088Z/api2-nest.zip"
+          "S3Key": "serverless/api2-nest/prod/1665079835387-2022-10-06T18:10:35.387Z/api2-nest.zip"
         },
         "Handler": "dist/serverless.handler",
         "Runtime": "nodejs12.x",
-        "FunctionName": "api2-nest-dev-main",
+        "FunctionName": "api2-nest-prod-main",
         "MemorySize": 1024,
         "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "SENTRY_TRACES_SAMPLE_RATE": "1.0",
+            "SENTRY_DSN": "https://aec92c65ed10431faf5a0f02ea14f174@o4503922291507200.ingest.sentry.io/4503923308822528",
+            "NODE_OPTIONS": "-r @sentry/serverless/dist/awslambda-auto"
+          }
+        },
         "Role": {
           "Fn::GetAtt": [
             "IamRoleLambdaExecution",
             "Arn"
           ]
-        }
+        },
+        "Layers": [
+          "arn:aws:lambda:us-east-1:943013980633:layer:SentryNodeServerlessSDK:78"
+        ]
       },
       "DependsOn": [
         "MainLogGroup"
       ]
     },
-    "MainLambdaVersionKIRT4OKggCwRjE2MdHzfeXIwi6oJ6yZilLdbWKxwpc": {
+    "MainLambdaVersionGVYdEPPirgpXaUNzvoegq1UeTv2sotH0RD4jxkvg2Pg": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "MainLambdaFunction"
         },
-        "CodeSha256": "9TXoxLi/UGU9+vXKoyG4iDCpFrvWzOkmXzc+lJXW13E="
+        "CodeSha256": "e/5ASSpHRSvhzTVO6XyYi34917pNXY4ccNNT8ijtjoQ="
       }
     },
     "ApiGatewayResourceProxyVar": {
@@ -283,11 +293,11 @@
         "MainLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1664316596675": {
+    "ApiGatewayDeployment1665079814742": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": "2d5yxyfnc5",
-        "StageName": "dev"
+        "StageName": "prod"
       },
       "DependsOn": [
         "ApiGatewayMethodAny",
@@ -336,16 +346,16 @@
         "Ref": "ServerlessDeploymentBucket"
       },
       "Export": {
-        "Name": "sls-api2-nest-dev-ServerlessDeploymentBucketName"
+        "Name": "sls-api2-nest-prod-ServerlessDeploymentBucketName"
       }
     },
     "MainLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "MainLambdaVersionKIRT4OKggCwRjE2MdHzfeXIwi6oJ6yZilLdbWKxwpc"
+        "Ref": "MainLambdaVersionGVYdEPPirgpXaUNzvoegq1UeTv2sotH0RD4jxkvg2Pg"
       },
       "Export": {
-        "Name": "sls-api2-nest-dev-MainLambdaFunctionQualifiedArn"
+        "Name": "sls-api2-nest-prod-MainLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {
@@ -364,12 +374,12 @@
             {
               "Ref": "AWS::URLSuffix"
             },
-            "/dev"
+            "/prod"
           ]
         ]
       },
       "Export": {
-        "Name": "sls-api2-nest-dev-ServiceEndpoint"
+        "Name": "sls-api2-nest-prod-ServiceEndpoint"
       }
     }
   }

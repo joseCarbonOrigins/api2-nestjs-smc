@@ -8,6 +8,7 @@ import {
   Put,
   Post,
   Header,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 // serivices
@@ -21,7 +22,9 @@ import {
 } from '../dtos/missions.dto';
 import { CamerasArrangementDto } from '../dtos/skippy.dto';
 import { SubmitEventDto } from '../dtos/event.dto';
+import { SentryInterceptor } from '../../interceptors/sentry.interceptor';
 
+@UseInterceptors(SentryInterceptor)
 @ApiTags('Origins')
 @Controller('origins')
 export class OriginsController {

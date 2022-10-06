@@ -61,9 +61,9 @@ export class OthersService {
     //try catch
     try {
       throw new Error('throw error');
-    }
-    catch (error) {
+    } catch (error) {
       // Sentry.captureException(error);
+      throw new InternalServerErrorException('throw error');
     }
   }
 
@@ -71,10 +71,8 @@ export class OthersService {
     //try catch
     try {
       throw new Error('throw error');
-    }
-    catch (error) {
+    } catch (error) {
       Sentry.captureException(error);
     }
   }
-
 }

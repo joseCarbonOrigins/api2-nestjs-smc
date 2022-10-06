@@ -7,13 +7,16 @@ import {
   Param,
   Patch,
   Put,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { OthersService } from '../services/others.service';
+
 //dtos
 import { RestaurantDto } from '../dtos/restaurants.dto';
-import path from 'path';
+import { SentryInterceptor } from '../../interceptors/sentry.interceptor';
 
+@UseInterceptors(SentryInterceptor)
 @ApiTags('Others')
 @Controller('others')
 export class OthersController {
