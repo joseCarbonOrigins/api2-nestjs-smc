@@ -8,7 +8,7 @@
       "name": "aws",
       "runtime": "nodejs12.x",
       "region": "us-east-1",
-      "stage": "dev",
+      "stage": "prod",
       "apiGateway": {
         "restApiId": "2d5yxyfnc5",
         "restApiRootResourceId": "jofh927v87"
@@ -90,7 +90,7 @@
           "MainLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/api2-nest-dev-main"
+              "LogGroupName": "/aws/lambda/api2-nest-prod-main"
             }
           },
           "IamRoleLambdaExecution": {
@@ -119,7 +119,7 @@
                       "-",
                       [
                         "api2-nest",
-                        "dev",
+                        "prod",
                         "lambda"
                       ]
                     ]
@@ -135,7 +135,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-prod*:*"
                           }
                         ]
                       },
@@ -146,7 +146,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/api2-nest-prod*:*:*"
                           }
                         ]
                       }
@@ -160,7 +160,7 @@
                   "-",
                   [
                     "api2-nest",
-                    "dev",
+                    "prod",
                     {
                       "Ref": "AWS::Region"
                     },
@@ -177,11 +177,11 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/api2-nest/dev/1664316617088-2022-09-27T22:10:17.088Z/api2-nest.zip"
+                "S3Key": "serverless/api2-nest/prod/1664909616909-2022-10-04T18:53:36.909Z/api2-nest.zip"
               },
               "Handler": "dist/serverless.handler",
               "Runtime": "nodejs12.x",
-              "FunctionName": "api2-nest-dev-main",
+              "FunctionName": "api2-nest-prod-main",
               "MemorySize": 1024,
               "Timeout": 6,
               "Role": {
@@ -195,14 +195,14 @@
               "MainLogGroup"
             ]
           },
-          "MainLambdaVersionKIRT4OKggCwRjE2MdHzfeXIwi6oJ6yZilLdbWKxwpc": {
+          "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "MainLambdaFunction"
               },
-              "CodeSha256": "9TXoxLi/UGU9+vXKoyG4iDCpFrvWzOkmXzc+lJXW13E="
+              "CodeSha256": "l8yG1Xb+PFHfhEyiMo++iBy/ya/c3dW6m6gpiKmZs4M="
             }
           },
           "ApiGatewayResourceProxyVar": {
@@ -299,11 +299,11 @@
               "MainLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1664316596675": {
+          "ApiGatewayDeployment1664909596400": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": "2d5yxyfnc5",
-              "StageName": "dev"
+              "StageName": "prod"
             },
             "DependsOn": [
               "ApiGatewayMethodAny",
@@ -352,16 +352,16 @@
               "Ref": "ServerlessDeploymentBucket"
             },
             "Export": {
-              "Name": "sls-api2-nest-dev-ServerlessDeploymentBucketName"
+              "Name": "sls-api2-nest-prod-ServerlessDeploymentBucketName"
             }
           },
           "MainLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MainLambdaVersionKIRT4OKggCwRjE2MdHzfeXIwi6oJ6yZilLdbWKxwpc"
+              "Ref": "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4"
             },
             "Export": {
-              "Name": "sls-api2-nest-dev-MainLambdaFunctionQualifiedArn"
+              "Name": "sls-api2-nest-prod-MainLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -380,12 +380,12 @@
                   {
                     "Ref": "AWS::URLSuffix"
                   },
-                  "/dev"
+                  "/prod"
                 ]
               ]
             },
             "Export": {
-              "Name": "sls-api2-nest-dev-ServiceEndpoint"
+              "Name": "sls-api2-nest-prod-ServiceEndpoint"
             }
           }
         }
@@ -504,17 +504,17 @@
             }
           }
         ],
-        "name": "api2-nest-dev-main",
+        "name": "api2-nest-prod-main",
         "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "MainLambdaVersionKIRT4OKggCwRjE2MdHzfeXIwi6oJ6yZilLdbWKxwpc"
+        "versionLogicalId": "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4"
       }
     },
     "configValidationMode": "warn",
-    "serviceFilename": "serverless.dev.yaml",
+    "serviceFilename": "serverless.yaml",
     "initialServerlessConfig": {
       "service": "api2-nest",
       "plugins": {
@@ -535,7 +535,7 @@
     "artifact": "/Users/josemendoza/Documents/Carbon Origins/SMC/api2-nest/.serverless/api2-nest.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/api2-nest/dev/1664316617088-2022-09-27T22:10:17.088Z",
+    "artifactDirectoryName": "serverless/api2-nest/prod/1664909616909-2022-10-04T18:53:36.909Z",
     "artifact": "api2-nest.zip"
   }
 }
