@@ -61,8 +61,7 @@ export class OthersService {
     //try catch
     try {
       throw new Error('throw error');
-    }
-    catch (error) {
+    } catch (error) {
       // Sentry.captureException(error);
     }
   }
@@ -71,10 +70,16 @@ export class OthersService {
     //try catch
     try {
       throw new Error('throw error');
-    }
-    catch (error) {
+    } catch (error) {
       Sentry.captureException(error);
     }
   }
 
+  async skippyMetrics(body: any): Promise<void> {
+    try {
+      console.log('skippy metrics data: ', body);
+    } catch (error) {
+      throw new InternalServerErrorException('Could not read skippy metrics');
+    }
+  }
 }

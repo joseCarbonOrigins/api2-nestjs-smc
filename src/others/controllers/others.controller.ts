@@ -6,13 +6,13 @@ import {
   Header,
   Param,
   Patch,
+  Post,
   Put,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { OthersService } from '../services/others.service';
 //dtos
 import { RestaurantDto } from '../dtos/restaurants.dto';
-import path from 'path';
 
 @ApiTags('Others')
 @Controller('others')
@@ -60,5 +60,12 @@ export class OthersController {
   @Header('Access-Control-Allow-Origin', '*')
   throwErrorSentry() {
     return this.othersService.throwErrorSentry();
+  }
+
+  @ApiOperation({ summary: 'Skippy metrics' })
+  @Post('skippy/metrics')
+  @Header('Access-Control-Allow-Origin', '*')
+  skippyMetrics(@Body() body: any) {
+    return this.othersService.skippyMetrics(body);
   }
 }
