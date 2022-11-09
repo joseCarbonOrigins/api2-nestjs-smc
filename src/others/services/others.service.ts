@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 // schemas
 import { Restaurant } from 'src/database/schemas/restaurant.schema';
+import { Logs } from '../../database/schemas/logs.schema';
 import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 
@@ -10,6 +11,7 @@ import '@sentry/tracing';
 export class OthersService {
   constructor(
     @InjectModel(Restaurant.name) private restaurantModel: Model<Restaurant>,
+    @InjectModel(Logs.name) private logsModel: Model<Logs>,
   ) {}
 
   //Get all restaurants
@@ -75,9 +77,21 @@ export class OthersService {
     }
   }
 
-  async skippyMetrics(body: any): Promise<void> {
+  async skippyMetrics(body: any): Promise<any> {
     try {
-      console.log('skippy metrics data: ', body);
+      const { date, type, extraFields } = body;
+      const timeStamp = new Date();
+
+      const newLogs = new this.logsModel({
+        createdAt: timeStamp,
+        date,
+        type,
+        extraFields,
+      });
+
+      await newLogs.save();
+
+      return { message: 'metric created', success: true };
     } catch (error) {
       throw new InternalServerErrorException('Could not read skippy metrics');
     }
