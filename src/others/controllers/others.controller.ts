@@ -6,6 +6,7 @@ import {
   Header,
   Param,
   Patch,
+  Post,
   Put,
   UseInterceptors,
 } from '@nestjs/common';
@@ -63,5 +64,12 @@ export class OthersController {
   @Header('Access-Control-Allow-Origin', '*')
   throwErrorSentry() {
     return this.othersService.throwErrorSentry();
+  }
+
+  @ApiOperation({ summary: 'Skippy metrics' })
+  @Post('skippy/metrics')
+  @Header('Access-Control-Allow-Origin', '*')
+  skippyMetrics(@Body() body: any) {
+    return this.othersService.skippyMetrics(body);
   }
 }

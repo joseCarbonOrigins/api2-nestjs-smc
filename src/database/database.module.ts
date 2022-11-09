@@ -11,6 +11,7 @@ import { Log, LogSchema } from './schemas/log.schema';
 import { Mission, MissionSchema } from './schemas/mission.schema';
 import { Restaurant, RestaurantSchema } from './schemas/restaurant.schema';
 import { Event, EventSchema } from './schemas/event.schema';
+import { Logs, LogsSchema } from './schemas/logs.schema';
 
 @Global()
 @Module({
@@ -43,6 +44,10 @@ import { Event, EventSchema } from './schemas/event.schema';
       {
         name: Event.name,
         schema: EventSchema,
+      },
+      {
+        name: Logs.name,
+        schema: LogsSchema,
       },
     ]),
     MongooseModule.forRootAsync({

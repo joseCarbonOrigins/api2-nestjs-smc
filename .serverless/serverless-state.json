@@ -9,11 +9,6 @@
       "runtime": "nodejs12.x",
       "region": "us-east-1",
       "stage": "prod",
-      "environment": {
-        "SENTRY_TRACES_SAMPLE_RATE": "1.0",
-        "SENTRY_DSN": "https://aec92c65ed10431faf5a0f02ea14f174@o4503922291507200.ingest.sentry.io/4503923308822528",
-        "NODE_OPTIONS": "-r @sentry/serverless/dist/awslambda-auto"
-      },
       "apiGateway": {
         "restApiId": "2d5yxyfnc5",
         "restApiRootResourceId": "jofh927v87"
@@ -182,7 +177,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/api2-nest/prod/1665079835387-2022-10-06T18:10:35.387Z/api2-nest.zip"
+                "S3Key": "serverless/api2-nest/prod/1664909616909-2022-10-04T18:53:36.909Z/api2-nest.zip"
               },
               "Handler": "dist/serverless.handler",
               "Runtime": "nodejs12.x",
@@ -210,14 +205,14 @@
               "MainLogGroup"
             ]
           },
-          "MainLambdaVersionGVYdEPPirgpXaUNzvoegq1UeTv2sotH0RD4jxkvg2Pg": {
+          "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "MainLambdaFunction"
               },
-              "CodeSha256": "e/5ASSpHRSvhzTVO6XyYi34917pNXY4ccNNT8ijtjoQ="
+              "CodeSha256": "l8yG1Xb+PFHfhEyiMo++iBy/ya/c3dW6m6gpiKmZs4M="
             }
           },
           "ApiGatewayResourceProxyVar": {
@@ -314,7 +309,7 @@
               "MainLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1665079814742": {
+          "ApiGatewayDeployment1664909596400": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": "2d5yxyfnc5",
@@ -373,7 +368,7 @@
           "MainLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MainLambdaVersionGVYdEPPirgpXaUNzvoegq1UeTv2sotH0RD4jxkvg2Pg"
+              "Ref": "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4"
             },
             "Export": {
               "Name": "sls-api2-nest-prod-MainLambdaFunctionQualifiedArn"
@@ -531,7 +526,7 @@
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "MainLambdaVersionGVYdEPPirgpXaUNzvoegq1UeTv2sotH0RD4jxkvg2Pg"
+        "versionLogicalId": "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4"
       }
     },
     "configValidationMode": "warn",
@@ -556,7 +551,7 @@
     "artifact": "/Users/josemendoza/Documents/Carbon Origins/SMC/api2-nest/.serverless/api2-nest.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/api2-nest/prod/1665079835387-2022-10-06T18:10:35.387Z",
+    "artifactDirectoryName": "serverless/api2-nest/prod/1664909616909-2022-10-04T18:53:36.909Z",
     "artifact": "api2-nest.zip"
   }
 }
