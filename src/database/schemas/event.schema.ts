@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Event_Type, Platform_Name, Enviroment, enumValues } from './enums';
+import { Event_Type, Platform_Name, Environment, enumValues } from './enums';
 import { Skipster } from './skipster.schema';
 
 @Schema()
@@ -25,9 +25,9 @@ export class Event extends Document {
         enum: enumValues(Platform_Name),
         required: true,
       },
-      enviroment: {
+      environment: {
         type: String,
-        enum: enumValues(Enviroment),
+        enum: enumValues(Environment),
         required: true,
       },
       version: {

@@ -161,42 +161,32 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/api2-nest/prod/1664909616909-2022-10-04T18:53:36.909Z/api2-nest.zip"
+          "S3Key": "serverless/api2-nest/prod/1668109884245-2022-11-10T19:51:24.245Z/api2-nest.zip"
         },
         "Handler": "dist/serverless.handler",
         "Runtime": "nodejs12.x",
         "FunctionName": "api2-nest-prod-main",
         "MemorySize": 1024,
         "Timeout": 6,
-        "Environment": {
-          "Variables": {
-            "SENTRY_TRACES_SAMPLE_RATE": "1.0",
-            "SENTRY_DSN": "https://aec92c65ed10431faf5a0f02ea14f174@o4503922291507200.ingest.sentry.io/4503923308822528",
-            "NODE_OPTIONS": "-r @sentry/serverless/dist/awslambda-auto"
-          }
-        },
         "Role": {
           "Fn::GetAtt": [
             "IamRoleLambdaExecution",
             "Arn"
           ]
-        },
-        "Layers": [
-          "arn:aws:lambda:us-east-1:943013980633:layer:SentryNodeServerlessSDK:78"
-        ]
+        }
       },
       "DependsOn": [
         "MainLogGroup"
       ]
     },
-    "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4": {
+    "MainLambdaVersionivfqKBLQvPkDiXVfV6uBzOopuxCcEvg81eAZL1a6ls": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "MainLambdaFunction"
         },
-        "CodeSha256": "l8yG1Xb+PFHfhEyiMo++iBy/ya/c3dW6m6gpiKmZs4M="
+        "CodeSha256": "3AsGPpp8fdqHi5ZhTuDii51mRi4KEjAecc5XQGOkfGc="
       }
     },
     "ApiGatewayResourceProxyVar": {
@@ -293,7 +283,7 @@
         "MainLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1664909596400": {
+    "ApiGatewayDeployment1668109863429": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": "2d5yxyfnc5",
@@ -352,7 +342,7 @@
     "MainLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "MainLambdaVersionOslC6bYyoD7xiuDQIRSw43eVOPDxE3dJW0K2h90w4"
+        "Ref": "MainLambdaVersionivfqKBLQvPkDiXVfV6uBzOopuxCcEvg81eAZL1a6ls"
       },
       "Export": {
         "Name": "sls-api2-nest-prod-MainLambdaFunctionQualifiedArn"

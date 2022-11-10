@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Types } from 'mongoose';
 import {
-  Enviroment,
+  Environment,
   Event_Type,
   Platform_Name,
 } from 'src/database/schemas/enums';
@@ -34,8 +34,8 @@ export class SubmitEventDto {
       type: Platform_Name;
       required: true;
     };
-    enviroment: {
-      type: Enviroment;
+    environment: {
+      type: Environment;
       required: true;
     };
     version: {
