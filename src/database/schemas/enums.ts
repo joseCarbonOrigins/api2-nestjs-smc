@@ -45,6 +45,7 @@ export enum Event_Type {
   headset_disengage = 'headset_disengage',
   room_engage = 'room_engage',
   room_disengage = 'room_disengage',
+  camera_reset = 'camera_reset',
 }
 
 export enum Platform_Name {
@@ -52,7 +53,7 @@ export enum Platform_Name {
   smc = 'smc',
 }
 
-export enum Environment {
+export enum Enviroment {
   production = 'production',
   testing = 'testing',
 }
