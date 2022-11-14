@@ -1,19 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Bool } from 'aws-sdk/clients/clouddirectory';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 
 @Schema()
 export class Logs extends Document {
   @Prop({ required: true })
-  createdAd: Date;
+  createdAt: Date;
 
   @Prop({ required: true })
   date: Date;
 
-  @Prop({ required: false })
   type: string;
 
-  extraFields: any;
+  @Prop({ type: Object })
+  body: any;
 }
 
 export const LogsSchema = SchemaFactory.createForClass(Logs);

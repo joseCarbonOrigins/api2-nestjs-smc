@@ -53,7 +53,7 @@ export enum Platform_Name {
   smc = 'smc',
 }
 
-export enum Enviroment {
+export enum Environment {
   production = 'production',
   testing = 'testing',
 }

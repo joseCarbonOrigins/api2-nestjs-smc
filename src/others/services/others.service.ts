@@ -80,20 +80,21 @@ export class OthersService {
 
   async skippyMetrics(body: any): Promise<any> {
     try {
-      const { date, type, extraFields } = body;
       const timeStamp = new Date();
+      const { date, type, ...newObj } = body;
 
       const newLogs = new this.logsModel({
         createdAt: timeStamp,
         date,
         type,
-        extraFields,
+        body: newObj,
       });
 
       await newLogs.save();
 
       return { message: 'metric created', success: true };
     } catch (error) {
+      console.log('++metrics error++', error);
       throw new InternalServerErrorException('Could not read skippy metrics');
     }
   }
