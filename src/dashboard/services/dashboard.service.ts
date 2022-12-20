@@ -409,6 +409,8 @@ export class DashboardService {
 
   async modifySkippy(skippyemail: string, body: SkippyModifyDto): Promise<any> {
     try {
+      if (body['ip_address'] !== undefined)
+        body['connection_url'] = 'ws://' + body['ip_address'] + ':8888';
       const skippy = await this.skippyModel
         .findOneAndUpdate({ email: skippyemail }, body)
         .select(
@@ -425,6 +427,7 @@ export class DashboardService {
 
   async createSkippy(body: SkippyDto): Promise<any> {
     try {
+      body['connection_url'] = 'ws://' + body['ip_address'] + ':8888';
       const skippy = await this.skippyModel.create(body);
       return skippy;
     } catch (error) {

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { Skippy_Type } from 'src/database/schemas/enums';
 
 export class SkippyDto {
@@ -60,6 +60,7 @@ export class SkippyDto {
 
 export class SkippyModifyDto {
   @IsString()
+  @IsOptional()
   @ApiProperty({
     description: 'Skippy name',
     required: false,
@@ -68,6 +69,7 @@ export class SkippyModifyDto {
   name: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     description: 'Skippy email',
     required: false,
@@ -76,6 +78,7 @@ export class SkippyModifyDto {
   email: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     description: 'Skippy short id',
     required: false,
@@ -84,6 +87,7 @@ export class SkippyModifyDto {
   short_id: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     description: 'Skippy ip',
     required: false,
@@ -92,6 +96,7 @@ export class SkippyModifyDto {
   ip_address: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     description: 'Skippy agora channel',
     required: false,
@@ -100,6 +105,7 @@ export class SkippyModifyDto {
   agora_channel: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     description: 'Skippy phone',
     required: false,

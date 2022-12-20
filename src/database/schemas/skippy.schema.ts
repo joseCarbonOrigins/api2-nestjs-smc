@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
+import { validate } from 'class-validator';
 import { Document, Types } from 'mongoose';
 import { Mission_State, Status, Skippy_Type, enumValues } from './enums';
 
@@ -49,8 +50,11 @@ export class Skippy extends Document {
   @Prop({ required: false })
   short_id: string;
 
-  @Prop({ default: '192.68.0.1' })
+  @Prop({ default: '192.168.0.1' })
   ip_address: string;
+
+  @Prop({ default: 'ws://192.168.0.1:8888' })
+  connection_url: string;
 
   @Prop({ default: 'skippy-' })
   agora_channel: string;
@@ -63,6 +67,5 @@ export class Skippy extends Document {
     enum: enumValues(Skippy_Type),
   })
   type: string;
-
 }
 export const SkippySchema = SchemaFactory.createForClass(Skippy);
