@@ -717,7 +717,7 @@ export class OriginsService {
           email: skippyname,
         })
         .select(
-          '-_id name email ip_address cameras_arrangement agora_channel type',
+          '-_id name email ip_address cameras_arrangement agora_channel type connection_url',
         );
       const skippyData = {
         name: theSkippy[0].name,
@@ -726,6 +726,7 @@ export class OriginsService {
         cameras_arrangement: theSkippy[0].cameras_arrangement,
         agora_channel: theSkippy[0].agora_channel,
         type: theSkippy[0].type,
+        connection_url: theSkippy[0].connection_url,
       };
       return skippyData;
     } catch (error) {
@@ -762,7 +763,7 @@ export class OriginsService {
       const Skippies = await this.skippyModel
         .find({})
         .select(
-          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type',
+          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type connection_url',
         );
       return Skippies;
     } catch (error) {
