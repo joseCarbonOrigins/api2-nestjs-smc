@@ -9,6 +9,7 @@ export class Logs extends Document {
   @Prop({ required: true })
   date: Date;
 
+  @Prop({ required: true })
   type: string;
 
   @Prop({ type: Object })
