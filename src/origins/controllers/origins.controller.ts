@@ -157,6 +157,13 @@ export class OriginsController {
     return this.originsService.submitEvent(payload);
   }
 
+  @ApiOperation({ summary: 'Get skippy data' })
+  @Get('robot/:skippyname')
+  @Header('Access-Control-Allow-Origin', '*')
+  getSkippyDataName(@Param('skippyname') skippyname: string) {
+    return this.originsService.getSkippyDataName(skippyname);
+  }
+
   @ApiOperation({ summary: 'Receive skippys orders' })
   @Post('sms')
   @Header('Access-Control-Allow-Origin', '*')

@@ -736,6 +736,32 @@ export class OriginsService {
     }
   }
 
+  async getSkippyDataName(skippyname: string): Promise<any> {
+    try {
+      const theSkippy = await this.skippyModel
+        .where({
+          name: skippyname,
+        })
+        .select(
+          '-_id name email ip_address cameras_arrangement agora_channel type connection_url',
+        );
+      const skippyData = {
+        name: theSkippy[0].name,
+        email: theSkippy[0].email,
+        ip_address: theSkippy[0].ip_address,
+        cameras_arrangement: theSkippy[0].cameras_arrangement,
+        agora_channel: theSkippy[0].agora_channel,
+        type: theSkippy[0].type,
+        connection_url: theSkippy[0].connection_url,
+      };
+      return skippyData;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'getSkippyData - Couldnt return skippy data',
+      );
+    }
+  }
+
   async setSkippyCameras(
     skippyname: string,
     arrange: CamerasArrangementDto,
