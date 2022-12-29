@@ -37,3 +37,4 @@ lerna-debug.log*
 !.vscode/extensions.json
 .serverless/cloudformation-template-update-stack.json
 .serverless/api2-nest.zip
+.serverless/api2-nest.zip
