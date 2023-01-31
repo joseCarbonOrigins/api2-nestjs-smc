@@ -789,7 +789,7 @@ export class OriginsService {
       const Skippies = await this.skippyModel
         .find({})
         .select(
-          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type connection_url',
+          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type connection_url available robot_status',
         );
       return Skippies;
     } catch (error) {

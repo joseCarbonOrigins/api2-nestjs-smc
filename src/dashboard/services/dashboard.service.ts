@@ -11,6 +11,7 @@ import { DeliverLogicService } from '../../external/services/deliver-logic.servi
 import { Mission } from '../../database/schemas/mission.schema';
 import { Skippy } from '../../database/schemas/skippy.schema';
 import { Skipster } from 'src/database/schemas/skipster.schema';
+import { Logs } from 'src/database/schemas/logs.schema';
 // aws
 import { LambdaService } from '../../external/services/lambda.service';
 // dto
@@ -60,6 +61,7 @@ export class DashboardService {
     @InjectModel(Skippy.name) private skippyModel: Model<Skippy>,
     @InjectModel(Skipster.name) private skipsterModel: Model<Skipster>,
     @InjectModel(Skip.name) private skipModel: Model<Skip>,
+    @InjectModel(Logs.name) private logsModel: Model<Logs>,
     private lambdaService: LambdaService,
     private dl: DeliverLogicService,
     private configService: ConfigService,
@@ -476,10 +478,7 @@ export class DashboardService {
 
   async testingSantiago(): Promise<any> {
     try {
-      return this.getDistanceAndDuration(
-        '-34.908963, -56.1902335',
-        '-34.9094299, -56.1937528',
-      );
+      return null;
     } catch (e) {
       console.log(e);
       throw new NotFoundException(e);

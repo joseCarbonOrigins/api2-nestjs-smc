@@ -67,5 +67,11 @@ export class Skippy extends Document {
     enum: enumValues(Skippy_Type),
   })
   type: string;
+
+  @Prop({ default: true })
+  available: boolean;
+
+  @Prop({ default: 'Online' })
+  robot_status: string;
 }
 export const SkippySchema = SchemaFactory.createForClass(Skippy);
