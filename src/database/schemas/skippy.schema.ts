@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
-import { validate } from 'class-validator';
 import { Document, Types } from 'mongoose';
+import { validate } from 'class-validator';
 import { Mission_State, Status, Skippy_Type, enumValues } from './enums';
 
 @Schema()
@@ -73,5 +73,11 @@ export class Skippy extends Document {
 
   @Prop({ default: 'Online' })
   robot_status: string;
+
+  @Prop({ default: 'unknown' })
+  city: string;
+
+  @Prop({ default: null })
+  fleet: string;
 }
 export const SkippySchema = SchemaFactory.createForClass(Skippy);

@@ -56,6 +56,22 @@ export class SkippyDto {
     required: true,
   })
   type: Skippy_Type;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'City',
+    required: false,
+  })
+  city: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'Name of the fleet',
+    required: false,
+  })
+  fleet: string;
 }
 
 export class SkippyModifyDto {
@@ -112,4 +128,20 @@ export class SkippyModifyDto {
     type: String,
   })
   phone_number: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'City',
+    required: false,
+  })
+  city: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'Name of the fleet',
+    required: false,
+  })
+  fleet: string;
 }

@@ -784,13 +784,23 @@ export class OriginsService {
     }
   }
 
-  async getAllSkippies(): Promise<any> {
+  async getAllSkippies(city?: string): Promise<any> {
     try {
       const Skippies = await this.skippyModel
-        .find({})
+        .find(city ? { city: city } : {})
         .select(
-          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type connection_url available robot_status',
+          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type connection_url available robot_status city fleet',
         );
+      //sort by name
+      Skippies.sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
       return Skippies;
     } catch (error) {
       throw new InternalServerErrorException(

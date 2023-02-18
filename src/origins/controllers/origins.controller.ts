@@ -9,6 +9,7 @@ import {
   Post,
   Header,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 // serivices
@@ -146,8 +147,8 @@ export class OriginsController {
   @ApiOperation({ summary: 'Get all skippies data' })
   @Get('skippy')
   @Header('Access-Control-Allow-Origin', '*')
-  getAllSkippies() {
-    return this.originsService.getAllSkippies();
+  getAllSkippies(@Query('city') city?: string) {
+    return this.originsService.getAllSkippies(city);
   }
 
   @ApiOperation({ summary: 'Submit events' })
