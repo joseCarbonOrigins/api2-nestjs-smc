@@ -789,19 +789,23 @@ export class OriginsService {
       const Skippies = await this.skippyModel
         .find(city ? { city: city } : {})
         .select(
-          '-_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type connection_url available robot_status city fleet',
-        );
-      //sort by name
+          '_id name email mission status current_skip_id cameras_arrangement ip_address agora_channel phone_number type connection_url available robot_status city fleet',
+        )
+        .lean(); // added the lean() method to get plain JS objects
+
       Skippies.sort((a, b) => {
-        if (a.name < b.name) {
+        if (a._id > b._id) {
           return -1;
         }
-        if (a.name > b.name) {
+        if (a._id < b._id) {
           return 1;
         }
         return 0;
       });
-      return Skippies;
+      //remove the _id field from the object
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const result = Skippies.map(({ _id, ...rest }) => rest);
+      return result;
     } catch (error) {
       throw new InternalServerErrorException(
         'getAllSkippies - Couldnt return skippy data',
