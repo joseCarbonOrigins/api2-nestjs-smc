@@ -713,22 +713,11 @@ export class OriginsService {
   async getSkippyData(skippyname: string): Promise<any> {
     try {
       const theSkippy = await this.skippyModel
-        .where({
-          email: skippyname,
-        })
+        .findOne({ email: skippyname })
         .select(
-          '-_id name email ip_address cameras_arrangement agora_channel type connection_url',
+          '-_id name email ip_address cameras_arrangement agora_channel type connection_url agora_channel type connection_url available robot_status city fleet',
         );
-      const skippyData = {
-        name: theSkippy[0].name,
-        email: theSkippy[0].email,
-        ip_address: theSkippy[0].ip_address,
-        cameras_arrangement: theSkippy[0].cameras_arrangement,
-        agora_channel: theSkippy[0].agora_channel,
-        type: theSkippy[0].type,
-        connection_url: theSkippy[0].connection_url,
-      };
-      return skippyData;
+      return theSkippy;
     } catch (error) {
       throw new InternalServerErrorException(
         'getSkippyData - Couldnt return skippy data',
